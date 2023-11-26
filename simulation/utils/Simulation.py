@@ -12,6 +12,8 @@ class Simulation:
 
         self.data_store = DataStore()
         
+    def move_to_idle(self, time, )
+
     def simulate(self, max_time, building, event_queue: PriorityQueue, data_store):
 
         update_function = {

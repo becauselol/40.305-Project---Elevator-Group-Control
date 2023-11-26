@@ -1,4 +1,4 @@
-class Elevator():
+class Elevator:
 
     def __init__(self, capacity, floors, move_speed = 1, start_floor = 1):
         self.capacity = capacity
@@ -18,3 +18,10 @@ class Elevator():
         
         self.current_floor -= 1
 
+    def move_down_n(self, n):
+        for _ in range(n):
+            self.move_down()
+
+    def move_up_n(self, n):
+        for _ in range(n):
+            self.move_up()
