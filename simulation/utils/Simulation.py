@@ -1,42 +1,63 @@
 from queue import PriorityQueue
+from numpy.random import exponential
+
 from ..classes.Building import Building
-from .DataStore import DataStore
+# from .DataStore import DataStore
+from .Event import ArrivalEvent, PassengerEvent, MoveEvent
 
 
 class Simulation:
     
-    def __init__(self, num_elevators, num_floors, passenger_arrival_destination_rates):
-        self.building = Building(num_elevators, num_floors)
-        self.passenger_rates = passenger_arrival_destination_rates
-        self.event_queue = PriorityQueue()
+    def __init__(self):
+        pass    
 
-        self.data_store = DataStore()
+    def simulate(self, max_time):
+        self.arrival_queue = PriorityQueue()
+        building = Building(1, 3, 3)
+        elevator_events = [None]
+
+        # initialize all the arrival events
+        rates = [
+                [0, 1, 1],
+                [1, 0, 1],
+                [1, 1, 0]
+            ]
+
+        for i in range(3):
+            for j in range(3):
+                if i == j:
+                    continue
+                arrival_time = exponential(rates[i][j])
+                event = ArrivalEvent(
+                        arrival_time,
+                        building,
+                        i + 1,
+                        j + 1,
+                        rates[i][j]
+                    )
+
+                self.arrival_queue.put((arrival_time, event))
+
+        while self.arrival_queue[0][0] < max_time:
+            # check if elevator_events or arrival_event first
+            if elevator_events[0].time < self.arrival_queue[0][0]:
+                event = elevator_events[0]
+
+            else:
+                event = self.arrival_queue.get()
+
+            print(event)
+
+            new_events = event.update()
+
+            for e in new_events:
+                if isinstance(e, PassengerEvent):
+                    self.arrival_queue.put((e.time, e))
+                elif isinstance(e, MoveEvent):
+                    elevator_events[0] = e
+                elif isinstance(e, UpdateMoveEvent):
+                    self.arrival_queue.put((e.time, e))
+
+
         
-    def move_to_idle(self, time, )
 
-    def simulate(self, max_time, building, event_queue: PriorityQueue, data_store):
-
-        update_function = {
-            "wait_time": wait_time_update    
-        } 
-        
-        events_simulated = 0
-        while (curr_event := event_queue.get()).time < max_time:
-            events_simulated += 1
-    
-            # print time?
-    
-            update = curr_event.update(**curr_event.params, building=building)
-    
-            data_update = update["data_store"]
-    
-            for k, v in data_update.items():
-                update_function[k](data_store, v)
-    
-            new_events = update["new_events"]
-    
-            for event in new_events:
-                event_queue.put(event)
-    
-        return data_store
-    
