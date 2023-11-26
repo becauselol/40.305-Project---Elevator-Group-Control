@@ -3,7 +3,7 @@ from numpy.random import exponential
 
 from ..classes.Building import Building
 # from .DataStore import DataStore
-from .Event import ArrivalEvent, PassengerEvent, MoveEvent
+from .Event import ArrivalEvent, PassengerEvent, MoveEvent, UpdateMoveEvent
 
 
 class Simulation:
@@ -48,7 +48,10 @@ class Simulation:
 
             print(event)
 
-            new_events = event.update()
+            if isinstance(event, UpdateMoveEvent):
+                new_events = event.update(elevator_events)
+            else:
+                new_events = event.update()
 
             for e in new_events:
                 if isinstance(e, PassengerEvent):

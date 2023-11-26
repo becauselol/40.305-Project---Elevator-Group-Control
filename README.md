@@ -18,3 +18,8 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
+## Assumptions
+
+- Once an elevator reaches a certain floor and alights passengers, they will have to open their doors for a fixed amount of time before moving off
+- Passengers alight and board instantaneously
+- Once an elevator starts moving to an Idle position, it cannot be interrupted.
