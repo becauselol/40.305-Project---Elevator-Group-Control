@@ -194,7 +194,14 @@ class UpdateMoveEvent(Event):
                     self.time
                 )
             ]
-        next_move = self.building.controller.get_next_elevator_move()
+
+        # Check if lift is in motion
+        # being on a ReachFloorEvent implies being in motion
+        if isinstance(elevator_events[0], ReachFloorEvent):
+            # We want to check if the new call would affect
+            self.building.controller.check_correct_move(self.building.elevator, elevator_events[0])
+            # If it doesn't affect the motion, we just return
+            return
         
         
 

@@ -50,10 +50,12 @@ class ElevatorController:
     def __init__(self):
         # up calls
         self.up = PriorityQueue()
+        self.next_up = PriorityQueue()
 
         # each call can either be interior or exterior
         # down calls
         self.down = PriorityQueue()
+        self.next_down = PriorityQueue()
 
         self.idle_floor = 1
 
@@ -70,6 +72,18 @@ class ElevatorController:
             return self.down.get()
         elif elevator.direction == Move.UP or elevator.direction == Move.IDLE:
             return self.up.get()
+
+    def request_is_empty(self):
+        return self.up.empty() and self.down.empty()
+
+    def check_correct_move(self, time, elevator, event):
+        # check if the movement can be interrupted
+        # suppose elevator is moving up
+        if elevator.direction == Move.UP:
+            # is the elevator past the floor already?
+            while time - event.prev_time > (self.up[0][0] - elevator.current_floor) * elevator.move_speed:
+                self.next_up.put(self.up.get())
+        
 
     def get_idle_floor(self, elevator):
         """
