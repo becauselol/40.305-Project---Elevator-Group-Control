@@ -17,8 +17,6 @@ class Building:
         self.elevator = Elevator(elevator_capacity, num_floors)
         self.controller = ElevatorController(num_floors)
 
-    def get_next_elevator_move(self):
-        self.controller.next_floor(self.elevator)
 
     def add_passenger_to_floor(self, time, source_floor, passenger):
         direction = Move.UP if passenger.dest - passenger.source > 0 else Move.DOWN
