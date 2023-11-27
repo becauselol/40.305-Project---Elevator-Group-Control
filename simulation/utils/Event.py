@@ -11,6 +11,8 @@ class Priority(Enum):
     UPDATE = 3
     OTHER = 4
 
+# Priority ensures that we update then we board
+
 
 
 class Event(ABC):
@@ -185,7 +187,9 @@ class UpdateMoveEvent(Event):
 
         elevator = self.building.elevator
         event = elevator_events[0]
-        next_floor = self.building.controller.check_next_move(self.time, elevator)
+        moving = isinstance(event, ReachFloorEvent)
+        current_move_floor = event.alight_floor if moving else -1
+        next_floor = self.building.controller.check_next_move(self.time, elevator, moving, current_move_floor)
         print(elevator.direction)
         print(next_floor)
 
@@ -205,10 +209,11 @@ class UpdateMoveEvent(Event):
 
             nextEventParams = {}
             nextEventParams["building"] = self.building
+            latest_time = elevator_events[0].time
 
             wait = (next_floor == -1)
             if wait: 
-                nextEventParams["time"] = self.time + elevator.wait_idle_time
+                nextEventParams["time"] = latest_time + elevator.wait_idle_time
                 nextEventParams["floor"] = elevator.current_floor
                 nextEventParams["start_idle_time"] = self.time
 
@@ -216,7 +221,7 @@ class UpdateMoveEvent(Event):
                     WaitEvent(**nextEventParams)
                 ]
             else:
-                nextEventParams["time"] = self.time + elevator.move_speed
+                nextEventParams["time"] = latest_time + elevator.move_speed
                 nextEventParams["floor"] = elevator.current_floor + elevator.direction.value
                 nextEventParams["alight_floor"] = next_floor
                 nextEventParams["prev_time"] = self.time
@@ -305,16 +310,9 @@ class ReachFloorEvent(MoveEvent):
         # Consume the call first
         self.building.controller.consume_int_call(self.floor, self.building.elevator.direction)
 
-        # then check the next direction
-        self.building.controller.check_next_move(self.time, self.building.elevator)
         return [
             AlightEvent(
                 self.time,
-                self.building,
-                self.floor
-            ),
-            BoardEvent(
-                self.time + elevator.wait_time,
                 self.building,
                 self.floor
             ),
@@ -342,8 +340,15 @@ class DoorOpenEvent(MoveEvent):
     def update(self):
         """
         It should trigger a UpdateMoveEvent
+        when it is updating, basically means this event is over
+        Doors are now closing
         """
         return [
+            BoardEvent(
+                self.time,
+                self.building,
+                self.floor
+            ),
             UpdateMoveEvent(
                 self.time,
                 self.building

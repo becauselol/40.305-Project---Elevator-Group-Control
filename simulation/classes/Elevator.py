@@ -1,6 +1,7 @@
 from heapq import heappush, heappop
 from enum import Enum
 
+
 class Move(Enum):
     UP = 1
     DOWN = -1
@@ -130,7 +131,7 @@ class ElevatorController:
 
 
 
-    def check_next_move(self, time, elevator):
+    def check_next_move(self, time, elevator, moving=False, current_move_floor=-1):
         """
         Return the parameters of the next move that the elevator is supposed to do
         """
@@ -186,10 +187,14 @@ class ElevatorController:
             if self.ext_call[elevator.current_floor - 1].up_call:
                 return elevator.current_floor
             
+            # Idea is we can't interrupt the progress
+            if moving:
+                return current_move_floor
+
             elevator.direction = Move.DOWN
             print("DECIDED TO MOVE DOWN")
             # Now the max_floor is the next_floor to go to
-            for index in range(elevator.current_floor - 1, -1, -1):
+            for index in range(elevator.current_floor - 2, -1, -1):
                 e_call = self.ext_call[index]
                 if e_call.down_call:
                     return e_call.floor
@@ -220,11 +225,15 @@ class ElevatorController:
             if self.ext_call[elevator.current_floor - 1].down_call:
                 return elevator.current_floor
 
+            # Idea is we can't interrupt the progress
+            if moving:
+                return current_move_floor
+
             elevator.direction = Move.UP
             print("DECIDED TO MOVE UP")
             
-            # Now we need to consider the up call
-            for index in range(elevator.current_floor - 1, len(self.ext_call)):
+            # Now we need to consider the up call, cannot include current floor
+            for index in range(elevator.current_floor, len(self.ext_call)):
                 e_call = self.ext_call[index]
                 if e_call.up_call:
                     return e_call.floor
