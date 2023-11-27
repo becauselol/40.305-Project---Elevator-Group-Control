@@ -164,9 +164,6 @@ class UpdateMoveEvent(Event):
         # Check what the next correct move is for the elevator
 
         # If no current calls, wait until the time to move to idle
-        if self.building.controller.request_is_empty():
-            return [
-
         # Check if lift is in motion
         # being on a ReachFloorEvent implies being in motion
         if isinstance(elevator_events[0], ReachFloorEvent):
@@ -184,22 +181,17 @@ class UpdateMoveEvent(Event):
             nextEventParams["building"] = self.building
             if wait: 
                 return [
-
-                    WaitEvent(
-                        self.time + self.building.elevator.wait_idle_time,
-                        self.building,
-                        elevator_events[0].floor,
-                        self.time
-                    )
+                    WaitEvent(**nextEventParams)
                 ]
             else:
                 return [
-                    ReachFloorEvent(**reachFloorEventParams)
+                    ReachFloorEvent(**nextEventParams)
                 ]
 
         elif isinstance(elevator_events[0], StayIdleEvent):
             # If there is no event, wait
-            if self.building.controller.request_is_empty:
+            print(self.building.controller.up.queue, self.building.controller.down.queue)
+            if self.building.controller.request_is_empty():
                 return []
 
             # Otherwise respond
@@ -271,7 +263,7 @@ class ReachFloorEvent(MoveEvent):
                 ReachFloorEvent(
                     self.time + elevator.move_speed,
                     self.building,
-                    self.floor + (1 if elevator.direction == Move.UP else -1),
+                    self.floor + elevator.direction.value,
                     self.alight_floor,
                     self.prev_time
                 )

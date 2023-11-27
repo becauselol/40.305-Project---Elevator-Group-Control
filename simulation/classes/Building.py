@@ -15,7 +15,7 @@ class Building:
         self.alighted_people = [[] for _ in range(num_floors)]
 
         self.elevator = Elevator(elevator_capacity, num_floors)
-        self.controller = ElevatorController()
+        self.controller = ElevatorController(num_floors)
 
     def get_next_elevator_move(self):
         self.controller.next_floor(self.elevator)
@@ -26,7 +26,7 @@ class Building:
         is_new_passenger = len(self.waiting_people[source_floor - 1][direction]) == 0
         self.waiting_people[source_floor - 1][direction].append(passenger)
         
-        self.controller.add_floor(self.elevator, source_floor, True, time)
+        self.controller.add_ext_call(time, self.elevator, source_floor, direction)
 
         return is_new_passenger
 
@@ -46,7 +46,7 @@ class Building:
         
 
         for destination in destinations:
-            self.controller.add_floor(self.elevator, destination, False, time)
+            self.controller.add_int_call(time, self.elevator, destination)
 
     def remove_passenger_from_elevator(self, floor):
         self.alighted_people[floor - 1] = self.elevator.alighting_people[floor - 1]

@@ -3,7 +3,7 @@ from numpy.random import exponential
 
 from classes.Building import Building
 # from .DataStore import DataStore
-from .Event import ArrivalEvent, PassengerEvent, MoveEvent, UpdateMoveEvent, StayIdleEvent
+from .Event import ArrivalEvent, PassengerEvent, MoveEvent, ReachFloorEvent, UpdateMoveEvent, StayIdleEvent
 
 
 class Simulation:
@@ -40,7 +40,7 @@ class Simulation:
 
         while self.arrival_queue.queue[0][0] < max_time:
             # check if elevator_events or arrival_event first
-            if elevator_events[0].time < self.arrival_queue.queue[0][0]:
+            if  (not isinstance(elevator_events[0], StayIdleEvent)) and  elevator_events[0].time < self.arrival_queue.queue[0][0]:
                 event = elevator_events[0]
 
             else:
@@ -49,6 +49,11 @@ class Simulation:
             print(event)
             print(type(event))
             print("current elevator event:", type(elevator_events[0]))
+            if isinstance(elevator_events[0], ReachFloorEvent):
+                print("current target floor:", elevator_events[0].alight_floor)
+            print("current elevator floor:", building.elevator.current_floor)
+            print("current up queue:", building.controller.up.queue)
+            print("current down queue:", building.controller.down.queue)
 
             if isinstance(event, UpdateMoveEvent):
                 new_events = event.update(elevator_events)

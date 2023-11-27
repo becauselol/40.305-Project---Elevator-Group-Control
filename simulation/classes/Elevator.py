@@ -49,8 +49,16 @@ class Elevator:
 
 class ElevatorController:
 
-    def __init__(self):
+    def __init__(self, num_floors):
+        # Maintain 3 things
+        # Number to pick up
+        # Up pq, Dwon pq
+        # Then just subtract the number to pick up as you go along
         # up calls
+        self.idle_floor = 1
+
+        self.ext_up = [(False, 0)] * num_floors
+        self.ext_down = [(False, 0)] * num_floors
         self.up = PriorityQueue()
         self.next_up = PriorityQueue()
 
@@ -59,109 +67,42 @@ class ElevatorController:
         self.down = PriorityQueue()
         self.next_down = PriorityQueue()
 
-        self.idle_floor = 1
 
+    def add_ext_call(self, time, elevator, floor_call, direction):
+        pass
+
+    def add_int_call(self, time, elevator, floor_call):
+        pass
 
     def add_floor(self, elevator: Elevator, floor_call, ext, time):
-        # ext is either True or False to indicate whether it is exterior or interiro
-        if floor_call < elevator.current_floor:
-            self.down.put((floor_call, time, ext))
-        elif floor_call > elevator.current_floor:
-            self.up.put((floor_call, time, ext))
+        pass
 
     def next_floor(self, elevator: Elevator):
-        if elevator.direction == Move.DOWN:
-            return self.down.get()
-        elif elevator.direction == Move.UP or elevator.direction == Move.IDLE:
-            return self.up.get()
+        pass
 
     def request_is_empty(self):
-        return self.up.empty() and self.down.empty()
+        pass
 
     def check_next_move(self, time, elevator, event):
-        params = {}
-        params["prev_time"] = time
-        params["time"] = time + elevator.move_speed
-        params["floor"] = elevator.current_floor
-
-        if elevator.direction == Move.UP and self.up.empty() or (elevator.current_floor == elevator.floors):
-            # check if up empty.
-            # if it is then go down
-            elevator.direction = Move.DOWN
-            self.up = self.next_up
-            self.next_up = PriorityQueue()
-
-        elif elevator.direction == Move.DOWN and self.down.empty() or (elevator.current_floor == 1):
-            elevator.direction = Move.UP
-            self.down = self.next_down
-            self.next_down = PriorityQueue()
-
-        # Should try to implement wait logic here
-        # Currently implemented in UpdateMoveEvent
-
-        # After deciding the elevator direction
-        # Get the next call
-        if elevator.direction == Move.UP:
-            params["alight_floor"] = self.up.queue[0][0]
-        elif elevator.direction == Move.DOWN:
-            params["alight_floor"] = self.down.queue[0][0]
-
-        params["floor"] += (1 if elevator.direction == Move.UP else -1)
-        print("new floor:",params["floor"])
-
-        return params 
+        """
+        Return the parameters of the next move that the elevator is supposed to do
+        """
+        pass
 
 
 
     def get_new_call(self, time, elevator, event):
-        # Check which call was earlier, up or down
-        params = {}
-        params["prev_time"] = time
-        params["time"] = time + elevator.move_speed
-        params["floor"] = elevator.current_floor
-
-        if self.down.empty() or self.up.queue[0][1] < self.down.queue[0][1]:
-            # means we set direction to Move.UP
-            # and set destination as self.up.queue[0][0]
-            elevator.direction = Move.UP
-            params["alight_floor"] = self.up.queue[0][0]
-
-        else:
-            elevator.direction = Move.DOWN
-            params["alight_floor"] = self.down.queue[0][0]
-
-        params["floor"] += (1 if elevator.direction == Move.UP else -1)
-
-        return params
-            
-
-
-
+        """
+        Check what the new call is and respond accordingly
+        """
+        pass
 
     def interrupt_move(self, time, elevator, reachFloorEvent):
-        # check if the movement can be interrupted
-        # suppose elevator is moving up
-        params = reachFloorEvent.to_dict()
-        if elevator.direction == Move.UP:
-            # is the elevator past the floor already?
-
-            # checks if the next floor is past already
-            while (not self.up.empty()) and elevator.current_floor > self.up.queue[0][0]:
-                self.next_up.put(self.up.get())
-
-            if self.up.queue[0][0] != reachFloorEvent.alight_floor:
-                params["alight_floor"] = self.up.queue[0][0]
-
-        elif elevator.direction == Move.DOWN:
-
-            while (not self.down.empty()) and elevator.current_floor< self.down.queue[0][0]:
-                self.next_down.put(self.down.get())
-
-            if self.down.queue[0][0] != reachFloorEvent.alight_floor:
-                params["alight_floor"] = self.down.queue[0][0]
-
-        return params
-        
+        """
+        Figure out what is the update required to the reachFloorEvent
+        and return the updated reachFloorEvent parameters
+        """
+        pass
 
     def get_idle_floor(self, elevator):
         """
@@ -171,5 +112,5 @@ class ElevatorController:
         return self.idle_floor
 
     def move_idle_direction(self, elevator):
-        return Move.UP if elevator.current_floor < self.idle_floor else Move.DOWN
+        return Move.UP.value if elevator.current_floor < self.idle_floor else Move.DOWN.value
 
