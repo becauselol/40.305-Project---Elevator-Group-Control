@@ -20,18 +20,18 @@ class Building:
     def get_next_elevator_move(self):
         self.controller.next_floor(self.elevator)
 
-    def add_passenger_to_floor(self, source_floor, passenger):
+    def add_passenger_to_floor(self, time, source_floor, passenger):
         direction = Move.UP if passenger.dest - passenger.source > 0 else Move.DOWN
 
         is_new_passenger = len(self.waiting_people[source_floor - 1][direction]) == 0
         self.waiting_people[source_floor - 1][direction].append(passenger)
         
-        self.controller.add_floor(self.elevator, source_floor, ext=True)
+        self.controller.add_floor(self.elevator, source_floor, True, time)
 
         return is_new_passenger
 
 
-    def add_passenger_to_elevator(self, floor):
+    def add_passenger_to_elevator(self, time, floor):
         # get current floor and direction
         
         move_direction = self.elevator.direction
@@ -46,7 +46,7 @@ class Building:
         
 
         for destination in destinations:
-            self.controller.add_floor(self.elevator, destination, ext=False)
+            self.controller.add_floor(self.elevator, destination, False, time)
 
     def remove_passenger_from_elevator(self, floor):
         self.alighted_people = self.elevator.alighting_people[floor - 1]

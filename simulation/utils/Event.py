@@ -46,7 +46,7 @@ class ArrivalEvent(PassengerEvent):
 
     def update(self):
         new_passenger = Passenger(self.time, self.source, self.dest)
-        is_new_passenger = self.building.add_passenger_to_floor(self.source, new_passenger)
+        is_new_passenger = self.building.add_passenger_to_floor(self.time, self.source, new_passenger)
         
         # generate the new event to add the next passenger
         
@@ -68,7 +68,8 @@ class ArrivalEvent(PassengerEvent):
             new_events.append(
                     UpdateMoveEvent(
                             self.time,
-                            self.building
+                            self.building,
+                            -1
                         )
                 )
         
@@ -101,8 +102,9 @@ class AlightEvent(PassengerEvent):
     def update(self):
         self.building.remove_passenger_from_elevator(self.floor)
 
-        # This then triggers the board event, if anyone is boarding
-        new_events = [
+        # This then triggers the DepartureEvent since passengers
+        # need to leave the system
+        return [
                 DepartureEvent(
                     self.time,
                     self.building,
@@ -110,25 +112,6 @@ class AlightEvent(PassengerEvent):
                 )
             ]
 
-        if self.building.check_passenger_boarding(self.floor):
-            new_events.append(
-                    BoardEvent(
-                        self.time + self.building.elevator.wait_time,
-                        self.building,
-                        self.floor
-                    )
-                )
-        else:
-            new_events.append(
-                    UpdateMoveEvent(
-                        self.time + self.building.elevator.wait_time,
-                        self.building
-                    )
-                )
-        # If no one is boarding, it trggers a UpdateMoveEvent instead
-        # And a departure event
-        return new_events
-        
 
 class BoardEvent(PassengerEvent):
     
@@ -141,24 +124,17 @@ class BoardEvent(PassengerEvent):
         return f"{super().__str__()}Boarding People from {self.floor}"
 
     def update(self):
-        self.building.add_passenger_to_elevator(self.floor)
-
-        return [
-            UpdateMoveEvent(
-                self.time,
-                self.building
-            )
-        ]
-
+        self.building.add_passenger_to_elevator(self.time, self.floor)
 
 
 class UpdateMoveEvent(Event):
     """
     Updates the MoveEvents
     """
-    def __init__(self, time, building):
+    def __init__(self, time, building, floor):
         self.time = time
         self.building = building
+        self.floor = floor
 
     def __str__(self):
         return f"{super().__str__()}Updating the MoveEvent for Elevator"
@@ -173,14 +149,15 @@ class UpdateMoveEvent(Event):
 
         When UpdateMoveEvent is called, there are a few states for the ElevatorEvents
         Elevator Event:
-            ReachFloorEvent (Regardless of if last Event was ArrivalEvent or BoardEvent)
+            ReachFloorEvent (Last event has to be a ArrivalEvent)
+            DoorOpenEvent (Waiting to see what the next call is)
             StayIdleEvent (Elevator has reached Idle position, now ready to respond to new calls)
             WaitEvent (Elevator is waiting for call but not ready to move to Idle position)
             MoveIdleEvent (Elevator is moving to an Idle position and cannot respond)
 
         Who calls this Event?:
             ArrivalEvent (We will check if ReachFloorEvent needs to be modified to Reach an earlier floor along it's path)
-            AlightEvent/BoardEvent (Check what is the next ReachFloorEvent we need to create)
+            DoorOpenEvent (Check what is the next ReachFloorEvent we need to create)
             StayIdleEvent (Check if there are any calls to respond to once it reaches Idle) (This is a necessary condition, since ReachFloorEvent cannot be created when Elevator is in MoveIdleEvent. ArrivalEvent will not trigger any ReachFloorEvent when Elevator is in MoveIdleEvent)
         """
         # Check what the next correct move is for the elevator
@@ -191,6 +168,7 @@ class UpdateMoveEvent(Event):
                 WaitEvent(
                     self.time + self.building.controller.wait_time,
                     self.building,
+                    elevator_events[0].floor,
                     self.time
                 )
             ]
@@ -199,18 +177,115 @@ class UpdateMoveEvent(Event):
         # being on a ReachFloorEvent implies being in motion
         if isinstance(elevator_events[0], ReachFloorEvent):
             # We want to check if the new call would affect
-            self.building.controller.check_correct_move(self.building.elevator, elevator_events[0])
+            reachFloorEventParams = self.building.controller.interrupt_move(self.time, self.building.elevator, elevator_events[0])
             # If it doesn't affect the motion, we just return
-            return
-        
-        
+            
+            return [
+                ReachFloorEvent(**reachFloorEventParams)
+            ]
 
-        return next_move
+        elif isinstance(elevator_events[0], DoorOpenEvent):
+            # Door was open and now we waiting to update to move to the next place
+            reachFloorEventParams = self.building.controller.check_next_move(self.time, self.building.elevator, elevator_events[0])
+            reachFloorEventParams["building"] = self.building
+            return [
+                ReachFloorEvent(**reachFloorEventParams)
+            ]
+
+        elif isinstance(elevator_events[0], StayIdleEvent):
+            # If there is no event, wait
+            if self.building.controller.request_is_empty:
+                return []
+
+            # Otherwise respond
+            reachFloorEventParams = self.building.controller.get_new_call(self.time, self.building.elevator, elevator_events[0])
+            reachFloorEventParams["building"] = self.building
+            return [
+                ReachFloorEvent(**reachFloorEventParams)
+            ]
+
+        elif isinstance(elevator_events[0], WaitEvent):
+            # There was previously no call
+            # Now it is called to respond,
+            # So we check what the new call is
+            reachFloorEventParams = self.building.controller.get_new_call(self.time, self.building.elevator, elevator_events[0])
+            reachFloorEventParams["building"] = self.building
+            return [
+                ReachFloorEvent(**reachFloorEventParams)
+            ]
+
+        elif isinstance(elevator_events[0], MoveIdleEvent):
+            # Cannot be disturbed
+            return []
+        else:
+            return []
+        
 
 class ReachFloorEvent(MoveEvent):
     """
     Collated Event that handles what happens when a 
     Elevator reaches a floor
+    """
+    def __init__(self, time, building, floor, alight_floor, prev_time):
+        self.time = time,
+        self.building = building
+        self.floor = floor
+        self.alight_floor = alight_floor
+        self.prev_time = prev_time
+
+    def __str__(self):
+        return f"{super().__str__()}Reached Floor {self.floor}"
+
+    def to_dict(self):
+        return {
+            "time": self.time,
+            "building": self.building,
+            "floor": self.floor,
+            "alight_floor": self.alight_floor,
+            "prev_time": self.prev_time
+        }
+
+    def update(self):
+        """
+        It should trigger the following events:
+            - AlightEvent
+            - BoardEvent
+            - DoorOpenEvent
+        """
+        elevator = self.building.elevator
+        if self.floor != self.alight_floor:
+            return [
+                ReachFloorEvent(
+                    self.time + elevator.move_speed,
+                    self.building,
+                    self.floor + elevator.direction,
+                    self.alight_floor,
+                    self.prev_time
+                )
+            ]
+        
+        return [
+            AlightEvent(
+                self.time,
+                self.building,
+                self.floor
+            ),
+            BoardEvent(
+                self.time + elevator.wait_time,
+                self.building,
+                self.floor
+            ),
+            DoorOpenEvent(
+                self.time + elevator.wait_time,
+                self.building,
+                self.floor,
+                self.time
+            )
+        ]
+
+class DoorOpenEvent(MoveEvent):
+    """
+    Elevator reaches a floor and the door is now open
     """
     def __init__(self, time, building, floor, prev_time):
         self.time = time,
@@ -223,24 +298,25 @@ class ReachFloorEvent(MoveEvent):
 
     def update(self):
         """
-        It should trigger a AlightEvent
+        It should trigger a UpdateMoveEvent
         """
-        
         return [
-            AlightEvent(
+            UpdateMoveEvent(
                 self.time,
                 self.building,
                 self.floor
             )
         ]
 
-class WaitEvent(Event):
+
+class WaitEvent(MoveEvent):
     """
     In this state, the Elevator can be disturbed and moved to another location
     """
-    def __init__(self, time, building, start_idle_time):
+    def __init__(self, time, building, floor, start_idle_time):
         self.time = time,
         self.building = building
+        self.floor = floor
         self.start_idle_time = start_idle_time
 
     def update(self):
@@ -249,17 +325,18 @@ class WaitEvent(Event):
             MoveIdleEvent(
                 self.time,
                 self.building,
-                self.building.controller.move_idle_direction(self.building.elevator)
+                self.building.controller.get_idle_floor(self.building.elevator)
             )
         ]
 
-class StayIdleEvent(Event):
+class StayIdleEvent(MoveEvent):
     """
     In this state, the Elevator can be disturbed and moved to another location
     """
-    def __init__(self, time, building, start_idle_time):
+    def __init__(self, time, building, floor, start_idle_time):
         self.time = time,
         self.building = building
+        self.floor = floor
         self.start_idle_time = start_idle_time
     
     def __str__(self):
@@ -272,11 +349,12 @@ class StayIdleEvent(Event):
         return [
             UpdateMoveEvent(
                 self.time,
-                self.building
+                self.building,
+                self.floor
             )
         ]
 
-class MoveIdleEvent(Event):
+class MoveIdleEvent(MoveEvent):
     """
     Event that triggers a move to idle position
     Elevator cannot be interrupted during this sequence
@@ -307,6 +385,7 @@ class MoveIdleEvent(Event):
             StayIdleEvent(
                 self.time,
                 self.building,
+                self.floor,
                 self.time
             )
         ]
