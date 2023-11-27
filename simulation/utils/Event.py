@@ -83,7 +83,7 @@ class ArrivalEvent(PassengerEvent):
         
         # Check if the current MoveEvents are correct
         # Otherwise update the MoveEvent
-        if is_new_passenger:
+        if self.building.elevator.direction in [Move.IDLE, Move.WAIT]:
             new_events.append(
                     UpdateMoveEvent(
                             self.time,
@@ -189,6 +189,9 @@ class UpdateMoveEvent(Event):
         event = elevator_events[0]
         moving = isinstance(event, ReachFloorEvent)
         current_move_floor = event.alight_floor if moving else -1
+
+        # Consume the call first
+        self.building.controller.consume_int_call(event.floor, event.building.elevator.direction)
         next_floor = self.building.controller.check_next_move(self.time, elevator, moving, current_move_floor)
         print(elevator.direction)
         print(next_floor)
@@ -198,10 +201,36 @@ class UpdateMoveEvent(Event):
             # If it doesn't affect the motion, we just return
             reachFloorEventParams = event.to_dict()
             reachFloorEventParams["alight_floor"] = next_floor
-            
-            return [
-                ReachFloorEvent(**reachFloorEventParams)
+            reachFloorEventParams["floor"] = event.floor + elevator.direction.value
+            reachFloorEventParams["time"] = event.time + elevator.move_speed
+            if elevator.current_floor != next_floor:
+                return [
+                    ReachFloorEvent(**reachFloorEventParams)
+                ]
+
+
+            # Call this to check what the next direction of the lift is
+            # The idea is if no more higher/lower calls to respond to, 
+            # it should then start looking down/up
+
+
+            new_events = [
+                DoorOpenEvent(
+                    event.time + elevator.wait_time,
+                    event.building,
+                    event.floor,
+                    event.time
+                )
             ]
+            if len(event.building.elevator.alighting_people[event.alight_floor - 1]) > 0:
+                new_events.append(
+                    AlightEvent(
+                        event.time,
+                        event.building,
+                        event.floor
+                    )
+                )
+            return new_events
 
         elif isinstance(elevator_events[0], DoorOpenEvent):
             # Door was open and now we waiting to update to move to the next place
@@ -216,6 +245,7 @@ class UpdateMoveEvent(Event):
                 nextEventParams["time"] = latest_time + elevator.wait_idle_time
                 nextEventParams["floor"] = elevator.current_floor
                 nextEventParams["start_idle_time"] = self.time
+                elevator.direction = Move.WAIT
 
                 return [
                     WaitEvent(**nextEventParams)
@@ -285,42 +315,15 @@ class ReachFloorEvent(MoveEvent):
         """
         It should trigger the following events:
             - AlightEvent
-            - BoardEvent
             - DoorOpenEvent
         """
         print("target floor:", self.alight_floor)
         elevator = self.building.elevator
         elevator.current_floor = self.floor
-        if self.floor != self.alight_floor:
-            return [
-                ReachFloorEvent(
-                    self.time + elevator.move_speed,
-                    self.building,
-                    self.floor + elevator.direction.value,
-                    self.alight_floor,
-                    self.prev_time
-                )
-            ]
-
-
-        # Call this to check what the next direction of the lift is
-        # The idea is if no more higher/lower calls to respond to, 
-        # it should then start looking down/up
-
-        # Consume the call first
-        self.building.controller.consume_int_call(self.floor, self.building.elevator.direction)
-
         return [
-            AlightEvent(
+            UpdateMoveEvent(
                 self.time,
-                self.building,
-                self.floor
-            ),
-            DoorOpenEvent(
-                self.time + elevator.wait_time,
-                self.building,
-                self.floor,
-                self.time
+                self.building
             )
         ]
 
@@ -433,7 +436,7 @@ class MoveIdleEvent(MoveEvent):
 
         
         # otherwise reach already
-        self.building.elevator.direction == Move.IDLE
+        self.building.elevator.direction = Move.IDLE
         return [
             StayIdleEvent(
                 self.time,

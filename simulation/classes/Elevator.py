@@ -6,6 +6,7 @@ class Move(Enum):
     UP = 1
     DOWN = -1
     IDLE = 0
+    WAIT = 0
 
 
 
@@ -149,6 +150,12 @@ class ElevatorController:
             
             elevator.direction = Move.UP if elevator.current_floor < target_floor else Move.DOWN
             print("updated direction:", elevator.direction)
+
+        if elevator.direction == Move.UP and elevator.current_floor == elevator.floors:
+            elevator.direction = Move.DOWN
+        elif elevator.direction == Move.DOWN and elevator.current_floor == 1:
+            elevator.direction = Move.UP
+            
             
 
         # If elevator is moving along a certain direction, check what the next move is supposed to be
