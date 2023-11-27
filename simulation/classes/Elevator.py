@@ -16,6 +16,8 @@ class Elevator:
         self.move_speed = move_speed
         self.current_floor = start_floor
         self.direction = Move.IDLE
+        self.wait_time = 0.5
+        self.wait_idle_time = 2
 
         self.alighting_people = [[] for _ in range(floors)]
 
@@ -77,13 +79,22 @@ class ElevatorController:
         return self.up.empty() and self.down.empty()
 
     def check_next_move(self, time, elevator, event):
-        if elevator.direction == Move.UP and self.up.empty():
+        params = {}
+        params["prev_time"] = time
+        params["time"] = time + elevator.move_speed
+        params["floor"] = elevator.current_floor
+
+        if elevator.direction == Move.UP and self.up.empty() or (elevator.current_floor == elevator.floors):
             # check if up empty.
             # if it is then go down
             elevator.direction = Move.DOWN
+            self.up = self.next_up
+            self.next_up = PriorityQueue()
 
-        elif elevator.direction == Move.DOWN and self.down.empty():
+        elif elevator.direction == Move.DOWN and self.down.empty() or (elevator.current_floor == 1):
             elevator.direction = Move.UP
+            self.down = self.next_down
+            self.next_down = PriorityQueue()
 
         # Should try to implement wait logic here
         # Currently implemented in UpdateMoveEvent
@@ -91,15 +102,14 @@ class ElevatorController:
         # After deciding the elevator direction
         # Get the next call
         if elevator.direction == Move.UP:
-            alight_floor = self.up[0][0]
+            params["alight_floor"] = self.up.queue[0][0]
         elif elevator.direction == Move.DOWN:
-            alight_floor = self.down[0][0]
+            params["alight_floor"] = self.down.queue[0][0]
 
-        params = {
-            "time": time,
-            "alight_floor": 
-        }
-            
+        params["floor"] += (1 if elevator.direction == Move.UP else -1)
+        print("new floor:",params["floor"])
+
+        return params 
 
 
 
@@ -108,12 +118,21 @@ class ElevatorController:
         params = {}
         params["prev_time"] = time
         params["time"] = time + elevator.move_speed
+        params["floor"] = elevator.current_floor
 
-        if self.up[0][1] < self.down[0][1]:
+        if self.down.empty() or self.up.queue[0][1] < self.down.queue[0][1]:
             # means we set direction to Move.UP
-            # and set destination as self.up[0][0]
+            # and set destination as self.up.queue[0][0]
             elevator.direction = Move.UP
-            params["alight_floor"] = self.up[0][0]
+            params["alight_floor"] = self.up.queue[0][0]
+
+        else:
+            elevator.direction = Move.DOWN
+            params["alight_floor"] = self.down.queue[0][0]
+
+        params["floor"] += (1 if elevator.direction == Move.UP else -1)
+
+        return params
             
 
 
@@ -127,19 +146,19 @@ class ElevatorController:
             # is the elevator past the floor already?
 
             # checks if the next floor is past already
-            while (not self.up.empty()) and reachFloorEvent.floor > self.up[0][0]:
+            while (not self.up.empty()) and elevator.current_floor > self.up.queue[0][0]:
                 self.next_up.put(self.up.get())
 
-            if self.up[0][0] != reachFloorEvent.alight_floor:
-                params["alight_floor"] = self.up[0][0]
+            if self.up.queue[0][0] != reachFloorEvent.alight_floor:
+                params["alight_floor"] = self.up.queue[0][0]
 
-        elif elevator.direction = Move.DOWN:
+        elif elevator.direction == Move.DOWN:
 
-            while reachFloorEvent.floor < self.down[0][0]:
+            while (not self.down.empty()) and elevator.current_floor< self.down.queue[0][0]:
                 self.next_down.put(self.down.get())
 
-            if self.down[0][0] != reachFloorEvent.alight_floor:
-                params["alight_floor"] = self.down[0][0]
+            if self.down.queue[0][0] != reachFloorEvent.alight_floor:
+                params["alight_floor"] = self.down.queue[0][0]
 
         return params
         

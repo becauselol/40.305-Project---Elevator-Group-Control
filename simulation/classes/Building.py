@@ -49,7 +49,7 @@ class Building:
             self.controller.add_floor(self.elevator, destination, False, time)
 
     def remove_passenger_from_elevator(self, floor):
-        self.alighted_people = self.elevator.alighting_people[floor - 1]
+        self.alighted_people[floor - 1] = self.elevator.alighting_people[floor - 1]
         self.elevator.alighting_people[floor - 1] = []
 
 
