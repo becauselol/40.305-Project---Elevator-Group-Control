@@ -1,5 +1,5 @@
 import pytest
-from classes.Controller import EqualController, Move
+from controller import EqualController, Move
 
 def test_controller_get_closest_up():
     num_floors = 4 
@@ -31,7 +31,7 @@ def test_controller_get_closest_down():
     assert 2 == controller.where_next_moving(4, Move.DOWN)
 
     controller.add_int_call(1, Move.DOWN)
-    assert 3 == controller.where_next_moving(2, Move.DOWN)
+    assert 2 == controller.where_next_moving(2, Move.DOWN)
 
     
 def test_controller_get_furthest_up():

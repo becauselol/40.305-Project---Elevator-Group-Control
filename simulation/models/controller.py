@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from heapq import heappush, heappop
 from enum import Enum
 
@@ -91,7 +91,7 @@ class EqualController(Controller):
         if move_direction == Move.UP:
             # Let's check for the nearest up call
             nearest_up = set([e_call.floor for e_call in self.ext_call if e_call.up_call and e_call.floor >= floor])
-            if self.int_calls:
+            if self.int_call:
                 nearest_up.add(self.int_call[0])
 
             if nearest_up:
@@ -104,7 +104,7 @@ class EqualController(Controller):
 
         elif move_direction == Move.DOWN:
             nearest_down = set([e_call.floor for e_call in self.ext_call if e_call.down_call and e_call.floor <= floor])
-            if self.int_calls:
+            if self.int_call:
                 nearest_down.add(move_direction.value * self.int_call[0])
 
             if nearest_down:
