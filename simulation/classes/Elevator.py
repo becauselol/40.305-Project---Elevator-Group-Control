@@ -1,4 +1,4 @@
-from queue import PriorityQueue
+from heapq import heappush, heappop
 from enum import Enum
 
 class Move(Enum):
@@ -52,8 +52,8 @@ class ExtCall:
         self.floor = floor
         self.up_call = False
         self.down_call = False
-        self.up_call_time = -1
-        self.down_call_time = -1
+        self.up_call_time = float("inf")
+        self.down_call_time = float("inf")
 
     def set_up_call(self, time):
         if self.up_call:
@@ -72,6 +72,12 @@ class ExtCall:
     def no_call(self):
         return not self.up_call and not self.down_call
 
+    def min_call(self):
+        if self.up_call_time < self.down_call_time:
+            return self.up_call_time 
+        else:
+            return self.down_call_time
+
 
 class ElevatorController:
 
@@ -86,7 +92,7 @@ class ElevatorController:
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
 
         # These are the internal calls
-        self.int_call = PriorityQueue()
+        self.int_call = []
 
 
     def add_ext_call(self, time, elevator, floor_call, direction):
@@ -97,12 +103,34 @@ class ElevatorController:
 
 
     def add_int_call(self, time, elevator, floor_call):
-        self.int_call.put(floor_call * elevator.direction.value)
+        if floor_call * elevator.direction.value not in self.int_call:
+            heappush(self.int_call, floor_call * elevator.direction.value)
 
     def request_is_empty(self):
-        return len(self.int_call.queue) == 0 and all([e_call.no_call() for e_call in self.ext_call])
+        return len(self.int_call) == 0 and all([e_call.no_call() for e_call in self.ext_call])
 
-    def check_next_move(self, time, elevator, event):
+    def consume_ext_call(self, floor, move_direction):
+        if move_direction == Move.UP:
+            self.ext_call[floor - 1].up_call = False
+            self.ext_call[floor - 1].up_call_time = float("inf")
+        elif move_direction == Move.DOWN:
+            self.ext_call[floor - 1].down_call = False
+            self.ext_call[floor - 1].down_call_time = float("inf")
+
+    def update_ext_call_priority(self, floor, move_direction, new_call_time):
+        if move_direction == Move.UP:
+            self.ext_call[floor - 1].up_call_time = new_call_time
+        elif move_direction == Move.DOWN:
+            self.ext_call[floor - 1].down_call_time = new_call_time
+
+    def consume_int_call(self, floor, move_direction):
+        print("call to consume:", floor * move_direction.value)
+        if floor * move_direction.value in self.int_call:
+            self.int_call = [v for v in self.int_call if v != floor * move_direction.value]
+
+
+
+    def check_next_move(self, time, elevator):
         """
         Return the parameters of the next move that the elevator is supposed to do
         """
@@ -110,50 +138,99 @@ class ElevatorController:
         if self.request_is_empty():
             return -1
 
+        # If elevator is idle, figure out which direction to move
+        if elevator.direction == Move.IDLE:
+            # Check what is the minimum direction
+            min_times = [e_call.min_call() for e_call in self.ext_call]
+            min_time = min(min_times)
+
+            target_floor = min_times.index(min_time) + 1
+            
+            elevator.direction = Move.UP if elevator.current_floor < target_floor else Move.DOWN
+            print("updated direction:", elevator.direction)
+            
+
         # If elevator is moving along a certain direction, check what the next move is supposed to be
         # If elevator is on up progress
+        print("ext_down_calls:", [e_call.down_call for e_call in self.ext_call])
+        print("ext_up_calls:", [e_call.up_call for e_call in self.ext_call])
+        print("int_calls:", self.int_call)
         if elevator.direction == Move.UP:
-            min_floor = "inf"
-            if not self.int_call.empty():
-                min_floor = min(min_floor, self.int_call.queue[0][0])
+            print("CONSIDERING MOVING UP")
+            min_floor = float("inf")
+            if self.int_call:
+                min_floor = min(min_floor, self.int_call[0])
 
+            # Should only check floors above current_floor
             for index in range(elevator.current_floor, len(self.ext_call)):
                 e_call = self.ext_call[index]
                 if e_call.up_call:
                     min_floor = min(min_floor, e_call.floor)
                     break
 
-            if min_floor != "inf":
+            if min_floor != float("inf"):
                 # We have found the next floor to go to
                 return min_floor
                 # Time to change direction
 
+            # Check if there are any down calls to respond to
+            # does not checks the current floor as well
+            for index in range(len(self.ext_call) -1, elevator.current_floor - 1, -1):
+                e_call = self.ext_call[index]
+                if e_call.down_call:
+                    print(e_call.floor)
+                    return e_call.floor
+
+            # lastly, if there is a call on the current floor
+            # We need to let them board first
+            if self.ext_call[elevator.current_floor - 1].up_call:
+                return elevator.current_floor
+            
             elevator.direction = Move.DOWN
+            print("DECIDED TO MOVE DOWN")
             # Now the max_floor is the next_floor to go to
             for index in range(elevator.current_floor - 1, -1, -1):
-                if self.ext_call[index].down_call:
-                    return self.ext_call[index].floor
+                e_call = self.ext_call[index]
+                if e_call.down_call:
+                    return e_call.floor
 
         elif elevator.direction == Move.DOWN:
-            max_floor = "-inf"
-            if not self.int_call.empty():
-                max_floor = max(max_floor, -1 * self.int_call.queue[0][0])
+            print("CONSIDERING MOVING DOWN")
+            max_floor = float("-inf")
+            if self.int_call:
+                max_floor = max(max_floor, -1 * self.int_call[0])
 
+            # Should not check current floor
             for index in range(elevator.current_floor - 2, -1, -1):
                 e_call = self.ext_call[index]
                 if e_call.down_call:
                     max_floor = max(max_floor, e_call.floor)
                     break
 
-            if max_floor != "-inf":
+            if max_floor != float("-inf"):
                 return max_floor
 
-            elevator.direction = Move.UP
-
-            for index in range(elevator.current_floor, len(self.ext_call)):
+            # check if there are any up calls to respond to
+            # Should not check current floor
+            for index in range(0, elevator.current_floor - 1):
                 e_call = self.ext_call[index]
                 if e_call.up_call:
                     return e_call.floor
+
+            if self.ext_call[elevator.current_floor - 1].down_call:
+                return elevator.current_floor
+
+            elevator.direction = Move.UP
+            print("DECIDED TO MOVE UP")
+            
+            # Now we need to consider the up call
+            for index in range(elevator.current_floor - 1, len(self.ext_call)):
+                e_call = self.ext_call[index]
+                if e_call.up_call:
+                    return e_call.floor
+
+        print("somehow didnt get any scenarios")
+        return -1
 
 
     def get_new_call(self, time, elevator, event):

@@ -35,19 +35,37 @@ class Building:
         move_direction = self.elevator.direction
 
         destinations = set()
-        for passenger in self.waiting_people[floor][move_direction]:
+        remaining_passengers = []
+        for passenger in self.waiting_people[floor - 1][move_direction]:
             if self.elevator.get_num_passengers() >= self.elevator.capacity:
-                break
+                remaining_passengers.append(passenger)
+                continue
 
             self.elevator.add_passenger(passenger)
             destinations.add(passenger.dest)
+
+        if len(remaining_passengers) == 0:
+            self.controller.consume_ext_call(floor, move_direction)
+        else:
+            # find the earliest arrival
+            # The one at the front of the queue should be the earliest spawn time
+            next_earliest_arrival = remaining_passengers[0].spawn_time
+            self.controller.update_ext_call_priority(floor, move_direction, next_earliest_arrival)
+
+        self.waiting_people[floor - 1][move_direction] = remaining_passengers
         
 
         for destination in destinations:
             self.controller.add_int_call(time, self.elevator, destination)
 
     def remove_passenger_from_elevator(self, floor):
+
         self.alighted_people[floor - 1] = self.elevator.alighting_people[floor - 1]
+
+        # Call should be consumed
+        # if len(self.elevator.alighting_people[floor - 1]) > 0:
+        #     self.controller.consume_int_call(floor, self.elevator.direction)
+
         self.elevator.alighting_people[floor - 1] = []
 
 

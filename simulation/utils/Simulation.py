@@ -41,6 +41,7 @@ class Simulation:
         while self.arrival_queue.queue[0][0] < max_time:
             # check if elevator_events or arrival_event first
             if  (not isinstance(elevator_events[0], StayIdleEvent)) and  elevator_events[0].time < self.arrival_queue.queue[0][0]:
+                # Ensures that given the same execution time, we initiate the DoorOpen first to 
                 event = elevator_events[0]
 
             else:
@@ -49,14 +50,17 @@ class Simulation:
             print(event)
             print(type(event))
             print("current elevator event:", type(elevator_events[0]))
+            print("current elevator direction:", building.elevator.direction)
             if isinstance(elevator_events[0], ReachFloorEvent):
                 print("current target floor:", elevator_events[0].alight_floor)
+                print("start time:", elevator_events[0].prev_time)
+                print("reach time:", elevator_events[0].time)
             print("current elevator floor:", building.elevator.current_floor)
-            print("current up queue:", building.controller.up.queue)
-            print("current down queue:", building.controller.down.queue)
 
             if isinstance(event, UpdateMoveEvent):
                 new_events = event.update(elevator_events)
+                print("UPDATED EVENT") 
+                print(new_events)
             else:
                 new_events = event.update()
 
@@ -67,6 +71,7 @@ class Simulation:
                     elevator_events[0] = e
                 elif isinstance(e, UpdateMoveEvent):
                     self.arrival_queue.put((e.time, e))
+
 
 
         
