@@ -19,8 +19,12 @@ class Event(ABC):
         return self.time > other.time or self.priority > other.priority
 
 class PassengerEvent(Event):
-    def __init__(self, time):
+    def __init__(self, time, floor, building):
         super().__init__(time, Priority.PASSENGER)
+        self.floor = floor
+        self.building = building
+        self.elevator = self.building.elevator
+        self.controller = self.building.controller
 
     @abstractmethod
     def update(self):

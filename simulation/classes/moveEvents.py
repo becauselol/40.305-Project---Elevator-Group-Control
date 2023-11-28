@@ -1,6 +1,6 @@
-from classes.event import MoveEvent
-from classes.passengerEvent import BoardEvent, AlightEvent
-from classes.controller import Move
+from event import MoveEvent
+from passengerEvents import BoardEvent, AlightEvent
+from controller import Move
 
 """
 NOTE: time is the time that the event occurs
@@ -15,10 +15,11 @@ class NextFloorEvent(MoveEvent):
         next_floor = self.controller.where_next_moving(self.elevator.floor, self.elevator.direction)
 
         if next_floor == self.floor:
-            return DoorOpenEvent(self.time, self.floor, self.building)
-            # return a door open event
+            yield DoorOpenEvent(self.time, self.floor, self.building)
+            return
+            # yield a door open event
 
-        return NextFloorEvent(
+        yield NextFloorEvent(
                 self.time + self.elevator.move_speed,
                 self.floor + self.elevator.direction.value,
                 self.building
@@ -29,14 +30,18 @@ class DoorOpenEvent(MoveEvent):
         super().__init__(time, floor, building)
 
     def update(self):
+        # consume the internal and external call
+        self.controller.consume_int_call(self.floor, self.elevator.direction)
+        self.controller.consume_ext_call(self.floor, self.elevator.direction)
         # Check if anyone alighting
         if self.elevator.check_alighting(self.floor):
             # trigger an alight event
-            return AlightEvent(self.time, self.floor, self.building)
+            yield AlightEvent(self.time, self.floor, self.building)
+            return
 
         # regardless, we then need to trigger a 
         # DoorCloseEvent and see what the next steps are
-        return DoorCloseEvent(
+        yield DoorCloseEvent(
                     self.time + self.elevator.open_door_time,
                     self.floor,
                     self.building
@@ -53,17 +58,19 @@ class DoorCloseEvent(MoveEvent):
 
         match self.elevator.direction:
             case Move.UP | Move.DOWN:
-                if self.building.check_boarding(self.floor):
+                if self.building.check_boarding(self.floor, self.elevator.direction):
                     # trigger a board event:
-                    return BoardEvent(self.time, self.floor, self.building)
+                    yield BoardEvent(self.time, self.floor, self.building)
+                    return
 
                 # then make sure we trigger a next floor event 
                 # that happens AFTER the board event
-                return NextFloorEvent(
+                yield NextFloorEvent(
                         self.time + self.elevator.move_speed,
                         self.floor + self.elevator.direction.value,
                         self.building
                     )
+                return
 
             case Move.WAIT:
                 # If the elevator is already at idle
@@ -71,9 +78,9 @@ class DoorCloseEvent(MoveEvent):
                     # We set the state to idle
                     self.elevator.direction = Move.IDLE
                     # Let the elevator stay at IDLE
-                    return None
+                    return
 
-                return MoveIdleEvent(
+                yield MoveIdleEvent(
                         self.time + self.elevator.wait_to_idle,
                         self.floor,
                         self.building
@@ -94,7 +101,7 @@ class MoveIdleEvent(MoveEvent):
         time_to_move_to_idle = self.controller.time_to_idle_floor(self.elevator)
         idle_floor = self.controller.get_idle_floor(self.elevator)
 
-        return ReachIdleEvent(self.time + time_to_move_to_idle , idle_floor, self.building)
+        yield ReachIdleEvent(self.time + time_to_move_to_idle , idle_floor, self.building)
 
 
 class ReachIdleEvent(MoveEvent):
@@ -103,12 +110,13 @@ class ReachIdleEvent(MoveEvent):
 
     def update(self):
         self.elevator.direction = Move.IDLE
-        self.elevator.floor = floor
+        self.elevator.floor = self.floor
 
         # check if there are any calls
         # If yes, we should do a NextFloor
         if self.controller.request_not_empty():
-            return UpdateMoveEvent(self.time, self.floor, self.building)
+            yield UpdateMoveEvent(self.time, self.floor, self.building)
+            return
 
 
 class UpdateMoveEvent(MoveEvent):
@@ -132,7 +140,7 @@ class UpdateMoveEvent(MoveEvent):
         # now check where to move
         # does so by triggering a NextFloorEvent
         # without any delay
-        return NextFloorEvent(self.time, self.floor, self.building)
+        yield NextFloorEvent(self.time, self.floor, self.building)
 
 
 

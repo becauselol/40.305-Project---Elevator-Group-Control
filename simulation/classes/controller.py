@@ -88,6 +88,12 @@ class EqualController(Controller):
         if self.int_call and self.int_call[0] == floor * move_direction.value:
             heappop(self.int_call)
 
+    def time_to_idle_floor(self, elevator):
+        return abs(elevator.floor - self.get_idle_floor(elevator)) * elevator.move_speed
+
+    def get_idle_floor(self, elevator):
+        return self.idle_floor
+
     def get_next_floor(self, floor, move_direction):
         if move_direction == Move.UP:
             # Let's check for the nearest up call
