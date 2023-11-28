@@ -56,7 +56,6 @@ class AlightEvent(PassengerEvent):
 
 
 class DepartureEvent(PassengerEvent):
-# triggers DoorCloseEvent
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
 
