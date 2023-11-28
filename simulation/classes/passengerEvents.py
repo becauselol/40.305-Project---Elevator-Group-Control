@@ -86,6 +86,7 @@ class BoardEvent(PassengerEvent):
         # board people
         internal_calls = self.building.add_passenger_to_elevator(self.floor, self.elevator.direction)
 
+        # CODE SHOULD BE IRRELEVANT SINCE ASSUMPTION IS ELEVATOR IS INFINITELY LARGE
         # if there are any more ppl waiting, we add ext call again
         if (boarding_passengers := self.building.get_boarding(self.floor, self.elevator.direction)):
             # the first in the queue will be the min_spawn_time
@@ -96,11 +97,9 @@ class BoardEvent(PassengerEvent):
         for new_int_call in internal_calls:
             self.controller.add_int_call(new_int_call, self.elevator.direction)
 
-        # potentially can be removed if DoorCloseEvent just yields this event as well
-        yield moveE.NextFloorEvent(
-                self.time + self.elevator.move_speed,
-                self.floor + self.elevator.direction.value,
+        # yields doorclose
+        yield moveE.DoorCloseEvent(
+                self.time,
+                self.floor,
                 self.building
-            ) 
-
-
+                )

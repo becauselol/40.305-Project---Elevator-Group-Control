@@ -90,22 +90,26 @@ class DoorOpenEvent(MoveEvent):
     def update(self):
         # consume the internal and external call
         self.controller.consume_int_call(self.floor, self.elevator.direction)
-        
-        if self.floor in [self.building.min_floor, self.building.max_floor]:
-            self.elevator.direction = Move.DOWN if self.elevator.direction == Move.UP else Move.UP
         self.controller.consume_ext_call(self.floor, self.elevator.direction)
+
         # Check if anyone alighting
         if self.elevator.check_alighting(self.floor):
             # trigger an alight event
             yield passE.AlightEvent(self.time, self.floor, self.building)
 
+        door_close = True
+        if self.building.check_boarding(self.floor, self.elevator.direction):
+            door_close = False
+            yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building)
+
         # regardless, we then need to trigger a 
         # DoorCloseEvent and see what the next steps are
-        yield DoorCloseEvent(
-                    self.time + self.elevator.open_door_time,
-                    self.floor,
-                    self.building
-                )
+        if door_close:
+            yield DoorCloseEvent(
+                        self.time + self.elevator.open_door_time,
+                        self.floor,
+                        self.building
+                    )
 
 
 class DoorCloseEvent(MoveEvent):
@@ -117,39 +121,32 @@ class DoorCloseEvent(MoveEvent):
 
     def update(self):
         # update the elevators movement
-        if not (boarding_check:= self.building.check_boarding(self.floor, self.elevator.direction)):
-            self.elevator.direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
+        new_direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
 
-        match self.elevator.direction:
-            case Move.UP | Move.DOWN:
-                if boarding_check:
-                    # trigger a board event:
-                    yield passE.BoardEvent(self.time, self.floor, self.building)
-                    return
-
-                # then make sure we trigger a next floor event 
-                # that happens AFTER the board event
-                assert self.building.min_floor <= self.floor + self.elevator.direction.value <= self.building.num_floors
-                yield NextFloorEvent(
-                        self.time + self.elevator.move_speed,
-                        self.floor + self.elevator.direction.value,
-                        self.building
+        if self.elevator.direction != new_direction:
+            self.elevator.direction = new_direction
+            yield DoorOpenEvent(self.time, self.floor, self.building)
+            return
+        elif self.elevator.direction == new_direction and new_direction != Move.WAIT:
+            yield NextFloorEvent(
+                    self.time + self.elevator.move_speed,
+                    self.floor + self.elevator.direction.value,
+                    self.building
                     )
+            return
+        elif self.elevator.direction == Move.WAIT:
+            if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
+                self.elevator.direction = Move.IDLE
                 return
-
-            case Move.WAIT:
-                # If the elevator is already at idle
-                if self.controller.at_idle(self.elevator):
-                    # We set the state to idle
-                    self.elevator.direction = Move.IDLE
-                    # Let the elevator stay at IDLE
-                    return
-
+            else:
                 yield MoveIdleEvent(
                         self.time + self.elevator.wait_to_idle,
                         self.floor,
                         self.building
-                    )
+                        )
+                return
+
+  
 
                 
 class MoveIdleEvent(MoveEvent):

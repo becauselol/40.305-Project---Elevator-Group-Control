@@ -61,6 +61,9 @@ class Simulation:
             event_time, event = heappop(self.event_queue)
 
             # TODO NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
+            if isinstance(event, moveE.UpdateMoveEvent):
+                # remove any existing MoveIdleEvent 
+                self.event_queue = [e for e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
             # if self.elevator.direction == Move.IDLE:
             print(event)
             for new_event in event.update():
