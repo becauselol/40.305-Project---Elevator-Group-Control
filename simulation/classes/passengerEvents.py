@@ -1,9 +1,9 @@
-from numpy.random import exponential
+import numpy as np
 
 from event import PassengerEvent
 from controller import Move
-from moveEvents import UpdateMoveEvent, NextFloorEvent, DoorCloseEvent
-from simulation.classes.passenger import Passenger
+import moveEvents as moveE
+from passenger import Passenger
 
 class ArrivalEvent(PassengerEvent):
 # need to add the external call
@@ -17,7 +17,7 @@ class ArrivalEvent(PassengerEvent):
 
     def next_arrival_event(self):
         return ArrivalEvent(
-            self.time + exponential(self.rate), 
+            self.time + np.random.exponential(self.rate), 
             self.floor, 
             self.building, 
             self.dest, 
@@ -35,7 +35,7 @@ class ArrivalEvent(PassengerEvent):
 
         # elevator will only be updated if it is in IDLE or WAIT
         if self.elevator.direction in [Move.IDLE, Move.WAIT]:
-            yield UpdateMoveEvent(self.time, self.floor, self.building)
+            yield moveE.UpdateMoveEvent(self.time, self.floor, self.building)
 
 
 class AlightEvent(PassengerEvent):
@@ -58,7 +58,7 @@ class DepartureEvent(PassengerEvent):
 
         # likewise, potentially can be removed if DoorOpenEvent
         # yields both DoorClose and AlightEvent
-        yield DoorCloseEvent(self.time, self.floor, self.building)
+        yield moveE.DoorCloseEvent(self.time, self.floor, self.building)
 
 
 class BoardEvent(PassengerEvent):
@@ -84,7 +84,7 @@ class BoardEvent(PassengerEvent):
             self.controller.add_int_call(new_int_call, self.elevator.direction)
 
         # potentially can be removed if DoorCloseEvent just yields this event as well
-        yield NextFloorEvent(
+        yield moveE.NextFloorEvent(
                 self.time + self.elevator.move_speed,
                 self.floor + self.elevator.direction.value,
                 self.building

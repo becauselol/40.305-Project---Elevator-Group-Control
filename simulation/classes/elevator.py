@@ -13,6 +13,9 @@ class Elevator:
 
         self.alighting_people = [[] for _ in range(num_floors)]
 
+    def add_passenger(self, passenger):
+        self.alighting_people[passenger.dest - 1].append(passenger)
+
     def get_num_passengers(self):
         return sum(len(arr) for arr in self.alighting_people)
 
@@ -20,7 +23,8 @@ class Elevator:
         return self.alighting_people[floor - 1]
 
     def check_alighting(self, floor):
-        return len(self.get_alighting(floor)) > 1
+        print(self.get_alighting(floor))
+        return len(self.get_alighting(floor)) > 0
 
     def clear_alighting(self, floor):
         self.alighting_people[floor - 1] = []

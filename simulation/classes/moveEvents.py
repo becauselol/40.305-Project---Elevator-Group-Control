@@ -1,5 +1,5 @@
 from event import MoveEvent
-from passengerEvents import BoardEvent, AlightEvent
+import passengerEvents as passE
 from controller import Move
 
 """
@@ -36,7 +36,7 @@ class DoorOpenEvent(MoveEvent):
         # Check if anyone alighting
         if self.elevator.check_alighting(self.floor):
             # trigger an alight event
-            yield AlightEvent(self.time, self.floor, self.building)
+            yield passE.AlightEvent(self.time, self.floor, self.building)
             return
 
         # regardless, we then need to trigger a 
@@ -54,13 +54,14 @@ class DoorCloseEvent(MoveEvent):
 
     def update(self):
         # update the elevators movement
-        self.elevator.direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
+        if not (boarding_check:= self.building.check_boarding(self.floor, self.elevator.direction)):
+            self.elevator.direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
 
         match self.elevator.direction:
             case Move.UP | Move.DOWN:
-                if self.building.check_boarding(self.floor, self.elevator.direction):
+                if boarding_check:
                     # trigger a board event:
-                    yield BoardEvent(self.time, self.floor, self.building)
+                    yield passE.BoardEvent(self.time, self.floor, self.building)
                     return
 
                 # then make sure we trigger a next floor event 
@@ -74,7 +75,7 @@ class DoorCloseEvent(MoveEvent):
 
             case Move.WAIT:
                 # If the elevator is already at idle
-                if self.controller.at_idle(elevator):
+                if self.controller.at_idle(self.elevator):
                     # We set the state to idle
                     self.elevator.direction = Move.IDLE
                     # Let the elevator stay at IDLE
@@ -114,9 +115,8 @@ class ReachIdleEvent(MoveEvent):
 
         # check if there are any calls
         # If yes, we should do a NextFloor
-        if self.controller.request_not_empty():
+        if not self.controller.request_is_empty():
             yield UpdateMoveEvent(self.time, self.floor, self.building)
-            return
 
 
 class UpdateMoveEvent(MoveEvent):
@@ -128,6 +128,8 @@ class UpdateMoveEvent(MoveEvent):
         super().__init__(time, floor, building)
 
     def update(self):
+        if self.elevator.direction == Move.MOVE_TO_IDLE:
+            raise Error("Moving to Idle, this event can't occur")
         # First remove any WaitIdleEvents in the queue
         if self.elevator.direction == Move.WAIT:
             # we need to eliminate the MoveIdleEvent

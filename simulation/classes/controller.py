@@ -94,6 +94,9 @@ class EqualController(Controller):
     def get_idle_floor(self, elevator):
         return self.idle_floor
 
+    def at_idle(self, elevator):
+        return self.idle_floor == elevator.floor
+
     def get_next_floor(self, floor, move_direction):
         if move_direction == Move.UP:
             # Let's check for the nearest up call
