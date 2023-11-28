@@ -4,6 +4,29 @@ from classes.controller import Move
 
 """
 NOTE: time is the time that the event occurs
+
+# Sequence of events when it reaches the correct floor
+# CONDITION: elevator is moving in direction up
+1. Check if there is anyone alighting
+2. Alight people
+3. wait for a bit
+4. check if there is anyone who wants to board in the direction up
+5. if yes, board them
+6. check if we need to change direction
+    7. check if there are any people in the lift who still want to go up
+    8. check if there are any calls above it that need to respond to
+9. if no need to change direction
+10. carry on 
+
+11. check if there are any calls below this floor as well (this includes anyone who wants to board on this floor)
+12. if yes, change direction
+13. check if there is anyone who wants to board in the direction down
+14. if yes, board them
+14. carry on
+
+15. If no then just change state to WAIT 
+16. And also add event to trigger the movement to Idle
+
 """
 
 class NextFloorEvent(MoveEvent):
