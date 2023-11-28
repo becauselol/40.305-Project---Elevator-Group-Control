@@ -10,6 +10,9 @@ class NextFloorEvent(MoveEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
 
+    def describe(self):
+        return f"Elevator reaching floor {self.floor}"
+
     def update(self):
         self.elevator.floor = self.floor
         next_floor = self.controller.where_next_moving(self.elevator.floor, self.elevator.direction)
@@ -28,6 +31,9 @@ class NextFloorEvent(MoveEvent):
 class DoorOpenEvent(MoveEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Elevator opening door at {self.floor}"
 
     def update(self):
         # consume the internal and external call
@@ -51,6 +57,9 @@ class DoorOpenEvent(MoveEvent):
 class DoorCloseEvent(MoveEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Elevator closing door at {self.floor}"
 
     def update(self):
         # update the elevators movement
@@ -92,6 +101,9 @@ class MoveIdleEvent(MoveEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
 
+    def describe(self):
+        return f"Moving to IDLE floor {self.controller.get_idle_floor(self.elevator)}"
+
     def update(self):
         # now that it is triggered, it should trigger a movement that allows the waiting elevator to move to the idle state
         
@@ -108,6 +120,9 @@ class MoveIdleEvent(MoveEvent):
 class ReachIdleEvent(MoveEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Reached the IDLE state at {self.floor}"
 
     def update(self):
         self.elevator.direction = Move.IDLE
@@ -126,6 +141,9 @@ class UpdateMoveEvent(MoveEvent):
     """
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Elevator was in IDLE/WAIT, updating move"
 
     def update(self):
         if self.elevator.direction == Move.MOVE_TO_IDLE:

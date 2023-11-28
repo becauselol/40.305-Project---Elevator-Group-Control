@@ -18,6 +18,9 @@ class Building:
             ]
         self.alighted_people = [[] for _ in range(num_floors)]
 
+    def get_terminating(self, floor):
+        return self.alighted_people[floor - 1]
+
     def get_boarding(self, floor, move_direction):
         return self.waiting_people[floor - 1][move_direction]
 

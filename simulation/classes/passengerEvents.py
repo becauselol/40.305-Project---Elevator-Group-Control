@@ -15,6 +15,9 @@ class ArrivalEvent(PassengerEvent):
         self.dest = dest
         self.rate = rate
 
+    def describe(self):
+        return f"Spawning from {self.source} -> {self.dest}"
+
     def next_arrival_event(self):
         return ArrivalEvent(
             self.time + np.random.exponential(self.rate), 
@@ -43,6 +46,9 @@ class AlightEvent(PassengerEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
 
+    def describe(self):
+        return f"Alighting {len(self.elevator.get_alighting(self.floor))} at {self.floor}"
+
 # will delete the internal calls
     def update(self):
         self.building.remove_passenger_from_elevator(self.floor)
@@ -53,6 +59,9 @@ class DepartureEvent(PassengerEvent):
 # triggers DoorCloseEvent
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Terminating {len(self.building.get_terminating(self.floor))} from {self.floor}"
 
     def update(self):
         removed_passengers = self.building.remove_passenger_from_building(self.floor)
@@ -68,6 +77,9 @@ class BoardEvent(PassengerEvent):
 # trigger NextFloorEvent
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Boarding {len(self.building.get_boarding(self.floor, self.elevator.direction))} at {self.floor}"
 
     def update(self):
 
