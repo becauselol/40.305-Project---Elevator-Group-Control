@@ -1,11 +1,13 @@
 
-from controller import EqualController, Move
-from elevator import Elevator
+from classes.controller import EqualController, Move
+from classes.elevator import Elevator
 
 
 class Building:
-    def __init__(self, num_floors):
+    def __init__(self, num_floors, min_floor=1):
         self.num_floors = num_floors
+        self.min_floor = min_floor
+        self.max_floor = num_floors
         self.elevator = Elevator(num_floors)
         self.controller = EqualController(num_floors)
 
@@ -17,6 +19,9 @@ class Building:
                 for _ in range(num_floors)
             ]
         self.alighted_people = [[] for _ in range(num_floors)]
+
+    def get_terminating(self, floor):
+        return self.alighted_people[floor - 1]
 
     def get_boarding(self, floor, move_direction):
         return self.waiting_people[floor - 1][move_direction]

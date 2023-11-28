@@ -1,9 +1,9 @@
 import numpy as np
 
-from event import PassengerEvent
-from controller import Move
-import moveEvents as moveE
-from passenger import Passenger
+from classes.event import PassengerEvent
+from classes.controller import Move
+import classes.moveEvents as moveE
+from classes.passenger import Passenger
 
 class ArrivalEvent(PassengerEvent):
 # need to add the external call
@@ -14,6 +14,9 @@ class ArrivalEvent(PassengerEvent):
         self.source = floor
         self.dest = dest
         self.rate = rate
+
+    def describe(self):
+        return f"Spawning from {self.source} -> {self.dest}"
 
     def next_arrival_event(self):
         return ArrivalEvent(
@@ -35,12 +38,16 @@ class ArrivalEvent(PassengerEvent):
 
         # elevator will only be updated if it is in IDLE or WAIT
         if self.elevator.direction in [Move.IDLE, Move.WAIT]:
+            self.elevator.direction = Move.WAIT_UPDATE
             yield moveE.UpdateMoveEvent(self.time, self.floor, self.building)
 
 
 class AlightEvent(PassengerEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Alighting {len(self.elevator.get_alighting(self.floor))} at {self.floor}"
 
 # will delete the internal calls
     def update(self):
@@ -49,16 +56,17 @@ class AlightEvent(PassengerEvent):
 
 
 class DepartureEvent(PassengerEvent):
-# triggers DoorCloseEvent
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
+
+    def describe(self):
+        return f"Terminating {len(self.building.get_terminating(self.floor))} from {self.floor}"
 
     def update(self):
         removed_passengers = self.building.remove_passenger_from_building(self.floor)
 
-        # likewise, potentially can be removed if DoorOpenEvent
-        # yields both DoorClose and AlightEvent
-        yield moveE.DoorCloseEvent(self.time, self.floor, self.building)
+        return
+        yield
 
 
 class BoardEvent(PassengerEvent):
@@ -68,11 +76,15 @@ class BoardEvent(PassengerEvent):
     def __init__(self, time, floor, building):
         super().__init__(time, floor, building)
 
+    def describe(self):
+        return f"Boarding {len(self.building.get_boarding(self.floor, self.elevator.direction))} at {self.floor}"
+
     def update(self):
 
         # board people
         internal_calls = self.building.add_passenger_to_elevator(self.floor, self.elevator.direction)
 
+        # CODE SHOULD BE IRRELEVANT SINCE ASSUMPTION IS ELEVATOR IS INFINITELY LARGE
         # if there are any more ppl waiting, we add ext call again
         if (boarding_passengers := self.building.get_boarding(self.floor, self.elevator.direction)):
             # the first in the queue will be the min_spawn_time
@@ -83,11 +95,9 @@ class BoardEvent(PassengerEvent):
         for new_int_call in internal_calls:
             self.controller.add_int_call(new_int_call, self.elevator.direction)
 
-        # potentially can be removed if DoorCloseEvent just yields this event as well
-        yield moveE.NextFloorEvent(
-                self.time + self.elevator.move_speed,
-                self.floor + self.elevator.direction.value,
+        # yields doorclose
+        yield moveE.DoorCloseEvent(
+                self.time,
+                self.floor,
                 self.building
-            ) 
-
-
+                )

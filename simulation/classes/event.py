@@ -11,12 +11,15 @@ class Event(ABC):
         self.time = time
         self.priority = priority
 
+    def __str__(self):
+        return f"Time {self.time:6.6f}: "
+
     @abstractmethod
     def update(self):
         pass
 
     def __gt__(self, other):
-        return self.time > other.time or self.priority > other.priority
+        return self.time > other.time or self.priority.value > other.priority.value
 
 class PassengerEvent(Event):
     def __init__(self, time, floor, building):
@@ -25,6 +28,13 @@ class PassengerEvent(Event):
         self.building = building
         self.elevator = self.building.elevator
         self.controller = self.building.controller
+
+    def __str__(self):
+        return f"{super().__str__()}{self.describe()}"
+
+    @abstractmethod
+    def describe(self):
+        pass
 
     @abstractmethod
     def update(self):
@@ -37,6 +47,13 @@ class MoveEvent(Event):
         self.building = building
         self.elevator = self.building.elevator
         self.controller = self.building.controller
+
+    def __str__(self):
+        return f"{super().__str__()}{self.describe()}"
+
+    @abstractmethod
+    def describe(self):
+        pass
 
     @abstractmethod
     def update(self):
