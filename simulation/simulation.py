@@ -57,14 +57,17 @@ class Simulation:
         self.initialize_arrivals(rate_matrix)
         print(self.building.elevator.direction)
         while self.event_queue[0][0] < max_time:
-            # if
+
             event_time, event = heappop(self.event_queue)
 
-            # TODO NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
-            if isinstance(event, moveE.UpdateMoveEvent):
-                # remove any existing MoveIdleEvent 
-                self.event_queue = [e for e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
             # if self.elevator.direction == Move.IDLE:
             print(event)
+            print(self.elevator.direction)
             for new_event in event.update():
+
+            # TODO NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
+                if isinstance(new_event, moveE.UpdateMoveEvent):
+                    # remove any existing MoveIdleEvent 
+                    new_queue = [(t, e) for t, e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
+                    self.event_queue = new_queue
                 heappush(self.event_queue, (new_event.time, new_event))

@@ -123,18 +123,8 @@ class DoorCloseEvent(MoveEvent):
         # update the elevators movement
         new_direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
 
-        if self.elevator.direction != new_direction:
-            self.elevator.direction = new_direction
-            yield DoorOpenEvent(self.time, self.floor, self.building)
-            return
-        elif self.elevator.direction == new_direction and new_direction != Move.WAIT:
-            yield NextFloorEvent(
-                    self.time + self.elevator.move_speed,
-                    self.floor + self.elevator.direction.value,
-                    self.building
-                    )
-            return
-        elif self.elevator.direction == Move.WAIT:
+        if new_direction == Move.WAIT:
+            self.elevator.direction = Move.WAIT
             if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
                 self.elevator.direction = Move.IDLE
                 return
@@ -144,7 +134,20 @@ class DoorCloseEvent(MoveEvent):
                         self.floor,
                         self.building
                         )
-                return
+                return        
+        elif self.elevator.direction == new_direction and new_direction != Move.WAIT:
+            yield NextFloorEvent(
+                    self.time + self.elevator.move_speed,
+                    self.floor + self.elevator.direction.value,
+                    self.building
+                    )
+            return
+        elif self.elevator.direction != new_direction:
+            self.elevator.direction = new_direction
+            yield DoorOpenEvent(self.time, self.floor, self.building)
+            return
+
+
 
   
 
@@ -199,7 +202,7 @@ class UpdateMoveEvent(MoveEvent):
 
     def update(self):
         if self.elevator.direction == Move.MOVE_TO_IDLE:
-            raise Error("Moving to Idle, this event can't occur")
+            raise Exception("Moving to Idle, this event can't occur")
         # First remove any WaitIdleEvents in the queue
         if self.elevator.direction == Move.WAIT:
             # we need to eliminate the MoveIdleEvent
@@ -212,7 +215,7 @@ class UpdateMoveEvent(MoveEvent):
         # now check where to move
         # does so by triggering a NextFloorEvent
         # without any delay
-        yield NextFloorEvent(self.time, self.floor, self.building)
+        yield NextFloorEvent(self.time, self.elevator.floor, self.building)
 
 
 

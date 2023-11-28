@@ -126,6 +126,7 @@ class EqualController(Controller):
             if farthest_up:
                 return min(farthest_up)
 
+        print(move_direction)
         raise Exception("No remaining calls in selected direction")
 
 

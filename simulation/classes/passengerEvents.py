@@ -66,9 +66,8 @@ class DepartureEvent(PassengerEvent):
     def update(self):
         removed_passengers = self.building.remove_passenger_from_building(self.floor)
 
-        # likewise, potentially can be removed if DoorOpenEvent
-        # yields both DoorClose and AlightEvent
-        yield moveE.DoorCloseEvent(self.time, self.floor, self.building)
+        return
+        yield
 
 
 class BoardEvent(PassengerEvent):
