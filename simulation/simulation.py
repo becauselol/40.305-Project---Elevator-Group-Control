@@ -47,22 +47,22 @@ class Simulation:
 
         self.initialize_building()
 
-        rate_matrix = [
-                [0, 100, 100, 100],
-                [100, 0, 100, 100],
-                [100, 100, 0, 100],
-                [100, 100, 100, 0]
-            ]
+        uniform_rate = 20
+        rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
 
         self.initialize_arrivals(rate_matrix)
-        print(self.building.elevator.direction)
+        # print(self.building.elevator.direction)
+        count = 0
         while self.event_queue[0][0] < max_time:
 
             event_time, event = heappop(self.event_queue)
 
             # if self.elevator.direction == Move.IDLE:
             print(event)
-            print(self.elevator.direction)
+            # print(self.elevator.get_num_passengers())
+            if self.elevator.direction == Move.IDLE:
+                count += 1
+            # print(self.elevator.direction)
             for new_event in event.update():
 
             # TODO NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
@@ -71,3 +71,6 @@ class Simulation:
                     new_queue = [(t, e) for t, e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
                     self.event_queue = new_queue
                 heappush(self.event_queue, (new_event.time, new_event))
+
+        print("NUMBER OF CYCLES")
+        print(count)

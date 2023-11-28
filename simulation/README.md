@@ -5,7 +5,7 @@ CONDITION: elevator is moving in direction up
 0. Elevator reaches the floor
     What this means is that we eliminate any internal calls and any external calls
 
-    DOOR OPEN --> triggers ALIGHT if alighting, triggers BOARD if boarding, triggers DOOR CLOSE
+    DOOR OPEN --> triggers ALIGHT if alighting, triggers BOARD 
 
 1. Check if there is anyone alighting
 
@@ -30,7 +30,7 @@ CONDITION: elevator is moving in direction up
 
 11. check if there are any calls below this floor as well (this includes anyone who wants to board on this floor)
 
-    DOOR OPEN --> trigger BOARD if boarding else DOOR CLOSE
+    DOOR OPEN --> triggers ALIGHT if alighting, triggers BOARD 
 
 12. if yes, change direction
     This then means we eliminate the external call that is to go down
