@@ -11,7 +11,7 @@ class NextFloorEvent(MoveEvent):
         super().__init__(time, floor, building)
 
     def describe(self):
-        return f"Elevator reaching floor {self.floor}"
+        return f"Elevator floor {self.elevator.floor} -> {self.floor}"
 
     def update(self):
         self.elevator.floor = self.floor
@@ -38,12 +38,14 @@ class DoorOpenEvent(MoveEvent):
     def update(self):
         # consume the internal and external call
         self.controller.consume_int_call(self.floor, self.elevator.direction)
+        
+        if self.floor in [self.building.min_floor, self.building.max_floor]:
+            self.elevator.direction = Move.DOWN if self.elevator.direction == Move.UP else Move.UP
         self.controller.consume_ext_call(self.floor, self.elevator.direction)
         # Check if anyone alighting
         if self.elevator.check_alighting(self.floor):
             # trigger an alight event
             yield passE.AlightEvent(self.time, self.floor, self.building)
-            return
 
         # regardless, we then need to trigger a 
         # DoorCloseEvent and see what the next steps are
@@ -75,6 +77,7 @@ class DoorCloseEvent(MoveEvent):
 
                 # then make sure we trigger a next floor event 
                 # that happens AFTER the board event
+                assert self.building.min_floor <= self.floor + self.elevator.direction.value <= self.building.num_floors
                 yield NextFloorEvent(
                         self.time + self.elevator.move_speed,
                         self.floor + self.elevator.direction.value,

@@ -143,26 +143,44 @@ class EqualController(Controller):
         Returns the next direction
         """
         # Any internal calls left?
+        print("int call:", self.int_call)
+        print("ext up call:", [e_call.up_call for e_call in self.ext_call])
+        print("ext down call:", [e_call.down_call for e_call in self.ext_call])
         if self.int_call:
             # if yes continue same direction
             return move_direction
 
         # any calls on this floor and above that go in same direction?
         if move_direction == Move.UP:
-            above_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor >= elevator_floor]
+            above_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor > elevator_floor]
+
+            if self.ext_call[elevator_floor - 1].up_call:
+                above_calls.append(elevator_floor)
+
             if above_calls:
                 return move_direction
 
-            down_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor <= elevator_floor]
+            down_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor < elevator_floor]
+
+            if self.ext_call[elevator_floor - 1].down_call:
+                down_calls.append(elevator_floor)
             if down_calls:
                 return Move.DOWN
         
         elif move_direction == Move.DOWN:
-            down_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor <= elevator_floor]
+            down_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor < elevator_floor]
+
+            if self.ext_call[elevator_floor - 1].down_call:
+                down_calls.append(elevator_floor)
+
             if down_calls:
                 return move_direction
 
-            above_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor >= elevator_floor]
+            above_calls = [e_call.floor for e_call in self.ext_call if e_call.has_call() and e_call.floor > elevator_floor]
+
+            if self.ext_call[elevator_floor - 1].up_call:
+                above_calls.append(elevator_floor)
+
             if above_calls:
                 return Move.UP
 

@@ -4,6 +4,7 @@ from numpy.random import exponential
 from classes.building import Building
 import classes.passengerEvents as passE
 import classes.moveEvents as moveE
+from classes.controller import Move
 # from .DataStore import DataStore
 
 
@@ -14,6 +15,8 @@ class Simulation:
     def initialize_building(self):
         self.num_floors = 4
         self.building = Building(self.num_floors)
+        self.elevator = self.building.elevator
+        self.controller = self.building.controller
 
     def initialize_arrivals(self, rate_matrix):
         # check square matrix
@@ -45,10 +48,10 @@ class Simulation:
         self.initialize_building()
 
         rate_matrix = [
-                [0, 10, 10, 10],
-                [10, 0, 10, 10],
-                [10, 10, 0, 10],
-                [10, 10, 10, 0]
+                [0, 100, 100, 100],
+                [100, 0, 100, 100],
+                [100, 100, 0, 100],
+                [100, 100, 100, 0]
             ]
 
         self.initialize_arrivals(rate_matrix)
@@ -56,6 +59,9 @@ class Simulation:
         while self.event_queue[0][0] < max_time:
             # if
             event_time, event = heappop(self.event_queue)
+
+            # TODO NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
+            # if self.elevator.direction == Move.IDLE:
             print(event)
             for new_event in event.update():
                 heappush(self.event_queue, (new_event.time, new_event))

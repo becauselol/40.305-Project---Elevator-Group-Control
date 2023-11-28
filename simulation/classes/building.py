@@ -4,8 +4,10 @@ from classes.elevator import Elevator
 
 
 class Building:
-    def __init__(self, num_floors):
+    def __init__(self, num_floors, min_floor=1):
         self.num_floors = num_floors
+        self.min_floor = min_floor
+        self.max_floor = num_floors
         self.elevator = Elevator(num_floors)
         self.controller = EqualController(num_floors)
 
