@@ -66,7 +66,7 @@ class TestDoorOpen:
     def test_alight_event(self):
         passenger = Passenger(0, 1, 2)
         self.building.add_passenger_to_floor(1, passenger)
-        self.building.add_passenger_to_elevators(1, Move.UP)
+        self.building.add_passenger_to_elevator(1, Move.UP)
         self.building.controller.add_int_call(2, Move.UP)
 
         event = moveE.DoorOpenEvent(0, 2, self.building)

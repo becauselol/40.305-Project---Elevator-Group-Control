@@ -39,7 +39,7 @@ class Building:
         return removed_passengers
 
     
-    def add_passenger_to_elevators(self, floor, move_direction):
+    def add_passenger_to_elevator(self, floor, move_direction):
         int_calls = set()
         remaining_passengers = []
 
