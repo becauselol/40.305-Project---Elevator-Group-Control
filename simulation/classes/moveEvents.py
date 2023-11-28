@@ -14,13 +14,13 @@ NOTE: time is the time that the event occurs
 
 1. Check if there is anyone alighting
 
-    ALIGHT
+    ALIGHT --> triggers DEPARTURE
 
 2. Alight people
 3. wait for a bit
 4. check if there is anyone who wants to board in the direction up
 
-    BOARD
+    BOARD --> triggers DOOR CLOSE
 
 5. if yes, board them
     update the internal calls
@@ -40,6 +40,9 @@ NOTE: time is the time that the event occurs
 12. if yes, change direction
     This then means we eliminate the external call that is to go down
 13. check if there is anyone who wants to board in the direction down
+
+    BOARD --> triggers DOOR CLOSE
+
 14. if yes, board them
     update the internal calls
 
