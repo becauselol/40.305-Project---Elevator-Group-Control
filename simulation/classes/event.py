@@ -15,6 +15,9 @@ class Event(ABC):
     def update(self):
         pass
 
+    def __gt__(self, other):
+        return self.time > other.time or self.priority > other.priority
+
 class PassengerEvent(Event):
     def __init__(self, time):
         super().__init__(time, Priority.PASSENGER)
@@ -24,8 +27,12 @@ class PassengerEvent(Event):
         pass
 
 class MoveEvent(Event):
-    def __init__(self, time):
+    def __init__(self, time, floor, building):
         super().__init__(time, Priority.MOVE)
+        self.floor = floor
+        self.building = building
+        self.elevator = self.building.elevator
+        self.controller = self.building.controller
 
     @abstractmethod
     def update(self):

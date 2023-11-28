@@ -7,6 +7,7 @@ class Move(Enum):
     DOWN = -1
     WAIT = 0
     IDLE = 0
+    MOVE_TO_IDLE = float("inf")
 
 class ExtCall:
     def __init__(self, floor):
@@ -156,6 +157,31 @@ class EqualController(Controller):
                 return Move.UP
 
         return Move.WAIT
+
+    def check_direction(self, elevator_floor):
+        # based on the current floor
+        # check which external call happened first
+
+        # compare on 3 factors
+        # 1: which call is the earliest
+        # 2: which floor is the closest
+        # 3: finally, just prefers lower floors
+        min_times = [(e_call.min_call(), abs(elevator_floor - e_call.floor), e_call.floor) for e_call in self.ext_call if e_call.has_call()]
+        call_time, dist_floor, target_floor = min(min_times)
+
+        if target_floor == elevator_floor:
+            # check whether its an up or down call
+            e_call = self.ext_call[target_floor - 1]
+            if call_time == e_call.up_call_time:
+                return Move.UP
+            else:
+                return Move.DOWN
+
+        # if the target floor is not the current floor
+        if target_floor > elevator_floor:
+            return Move.UP
+        else:
+            return Move.DOWN
 
 
 
