@@ -97,19 +97,9 @@ class DoorOpenEvent(MoveEvent):
             # trigger an alight event
             yield passE.AlightEvent(self.time, self.floor, self.building)
 
-        door_close = True
-        if self.building.check_boarding(self.floor, self.elevator.direction):
-            door_close = False
-            yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building)
+        # always try to board even if there is no one this is so we will check
+        yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building)
 
-        # regardless, we then need to trigger a 
-        # DoorCloseEvent and see what the next steps are
-        if door_close:
-            yield DoorCloseEvent(
-                        self.time + self.elevator.open_door_time,
-                        self.floor,
-                        self.building
-                    )
 
 
 class DoorCloseEvent(MoveEvent):
