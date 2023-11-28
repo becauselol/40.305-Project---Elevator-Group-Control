@@ -30,6 +30,7 @@ class TestArrival:
         # check that the call is added
         assert self.controller.ext_call[2 - 1].up_call
         assert self.controller.ext_call[2 - 1].up_call_time == 0
+        assert self.elevator.direction == Move.WAIT_UPDATE
 
     def test_no_update(self):
         self.elevator.direction = Move.UP

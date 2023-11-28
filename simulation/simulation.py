@@ -42,16 +42,18 @@ class Simulation:
         self.initialize_building()
 
         rate_matrix = [
-                [0, 10, 10],
-                [10, 0, 10],
-                [10, 10, 0]
+                [0, 10, 10, 10],
+                [10, 0, 10, 10],
+                [10, 10, 0, 10],
+                [10, 10, 0, 10]
             ]
 
         self.initialize_arrivals(rate_matrix)
-
+        print(self.building.elevator.direction)
         while self.event_queue.queue[0][0] < max_time:
             # if
             event_time, event = self.event_queue.get()
+            print(self.building.elevator.direction)
 
             for new_event in event.update():
                 print(new_event)

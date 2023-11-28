@@ -1,4 +1,4 @@
-from controller import Move
+from classes.controller import Move
 
 
 class Elevator:
@@ -10,6 +10,7 @@ class Elevator:
         self.move_speed = 2
         self.wait_to_idle = 2
         self.open_door_time = 1
+        print(self.direction)
 
         self.alighting_people = [[] for _ in range(num_floors)]
 

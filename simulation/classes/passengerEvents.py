@@ -1,9 +1,9 @@
 import numpy as np
 
-from event import PassengerEvent
-from controller import Move
-import moveEvents as moveE
-from passenger import Passenger
+from classes.event import PassengerEvent
+from classes.controller import Move
+import classes.moveEvents as moveE
+from classes.passenger import Passenger
 
 class ArrivalEvent(PassengerEvent):
 # need to add the external call
@@ -35,6 +35,7 @@ class ArrivalEvent(PassengerEvent):
 
         # elevator will only be updated if it is in IDLE or WAIT
         if self.elevator.direction in [Move.IDLE, Move.WAIT]:
+            self.elevator.direction = Move.WAIT_UPDATE
             yield moveE.UpdateMoveEvent(self.time, self.floor, self.building)
 
 

@@ -1,6 +1,6 @@
 
-from controller import EqualController, Move
-from elevator import Elevator
+from classes.controller import EqualController, Move
+from classes.elevator import Elevator
 
 
 class Building:

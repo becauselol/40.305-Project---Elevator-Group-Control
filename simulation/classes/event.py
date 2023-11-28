@@ -16,7 +16,7 @@ class Event(ABC):
         pass
 
     def __gt__(self, other):
-        return self.time > other.time or self.priority > other.priority
+        return self.time > other.time or self.priority.value > other.priority.value
 
 class PassengerEvent(Event):
     def __init__(self, time, floor, building):
