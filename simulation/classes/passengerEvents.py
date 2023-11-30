@@ -63,10 +63,13 @@ class DepartureEvent(PassengerEvent):
         return f"Terminating {len(self.building.get_terminating(self.floor))} from {self.floor}"
 
     def update(self):
-        removed_passengers = self.building.remove_passenger_from_building(self.floor)
+        self.removed_passengers = self.building.remove_passenger_from_building(self.floor, self.time)
 
         return
         yield
+
+    def data_update(self):
+        return self.removed_passengers
 
 
 class BoardEvent(PassengerEvent):
@@ -82,7 +85,7 @@ class BoardEvent(PassengerEvent):
     def update(self):
 
         # board people
-        internal_calls = self.building.add_passenger_to_elevator(self.floor, self.elevator.direction)
+        internal_calls = self.building.add_passenger_to_elevator(self.floor, self.elevator.direction, self.time)
 
         # CODE SHOULD BE IRRELEVANT SINCE ASSUMPTION IS ELEVATOR IS INFINITELY LARGE
         # if there are any more ppl waiting, we add ext call again

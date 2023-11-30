@@ -38,13 +38,17 @@ class Building:
         self.elevator.clear_alighting(floor)
 
 
-    def remove_passenger_from_building(self, floor):
+    def remove_passenger_from_building(self, floor, time):
         removed_passengers = self.alighted_people[floor - 1]
+
+        for passenger in removed_passengers:
+            passenger.set_exit_time(time)
+
         self.alighted_people[floor - 1] = []
         return removed_passengers
 
     
-    def add_passenger_to_elevator(self, floor, move_direction):
+    def add_passenger_to_elevator(self, floor, move_direction, time):
         int_calls = set()
         remaining_passengers = []
 
@@ -53,6 +57,7 @@ class Building:
                 remaining_passengers.append(passenger)
                 continue
 
+            passenger.set_board_time(time)
             self.elevator.add_passenger(passenger)
             int_calls.add(passenger.dest)
 

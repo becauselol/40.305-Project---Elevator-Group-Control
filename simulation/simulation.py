@@ -5,18 +5,20 @@ from classes.building import Building
 import classes.passengerEvents as passE
 import classes.moveEvents as moveE
 from classes.controller import Move
-# from .DataStore import DataStore
+from classes.DataStore import DataStore
 
 
 class Simulation:
-    def __init__(self):
+    def __init__(self, num_floors):
+        self.num_floors = num_floors
         self.event_queue = []
+        self.cycle_data = DataStore(self.num_floors)
 
     def initialize_building(self):
-        self.num_floors = 4
         self.building = Building(self.num_floors)
         self.elevator = self.building.elevator
         self.controller = self.building.controller
+        
 
     def initialize_arrivals(self, rate_matrix):
         # check square matrix
@@ -42,6 +44,8 @@ class Simulation:
 
         heapify(self.event_queue)
         
+    def reset_cycle_data(self):
+        self.cycle_data = DataStore(self.num_floors)
 
     def simulate(self, max_time):
 
@@ -58,11 +62,8 @@ class Simulation:
             event_time, event = heappop(self.event_queue)
 
             # if self.elevator.direction == Move.IDLE:
-            print(event)
+            # print(event)
             # print(self.elevator.get_num_passengers())
-            if self.elevator.direction == Move.IDLE:
-                count += 1
-                # yield the cycle data
             # print(self.elevator.direction)
             for new_event in event.update():
 
@@ -72,6 +73,19 @@ class Simulation:
                     new_queue = [(t, e) for t, e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
                     self.event_queue = new_queue
                 heappush(self.event_queue, (new_event.time, new_event))
+
+
+            removed_passengers = event.data_update()
+            if removed_passengers:
+                self.cycle_data.update_passengers(removed_passengers)
+
+            if self.elevator.direction == Move.IDLE:
+                count += 1
+                # yield the cycle data
+                self.cycle_data.finalize()
+                yield self.cycle_data
+
+                self.reset_cycle_data()
 
         print("NUMBER OF CYCLES")
         print(count)
