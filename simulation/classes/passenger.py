@@ -1,4 +1,4 @@
-from classes.controller import Move
+from .controller import Move
 
 class Passenger:
     def __init__(self, spawn_time, source, dest):

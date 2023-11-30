@@ -1,11 +1,11 @@
 from heapq import heappop, heappush, heapify
 from numpy.random import exponential
 
-from classes.building import Building
-import classes.passengerEvents as passE
-import classes.moveEvents as moveE
-from classes.controller import Move
-from classes.DataStore import DataStore
+from .classes.building import Building
+from .classes import passengerEvents as passE
+from .classes import moveEvents as moveE
+from .classes.controller import Move
+from .classes.DataStore import DataStore
 
 
 class Simulation:
