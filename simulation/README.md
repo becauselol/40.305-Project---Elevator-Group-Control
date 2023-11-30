@@ -56,6 +56,27 @@ Difference between `end_time` and `start_time`
 |`lift_time`|Difference between `exit_time` and `board_time`|
 |`sys_time`|Difference between `exit_time` and `spawn_time`|
 
+#### `elevator_state`
+
+`elevator_state` is a pandas dataframe that has the following columns for the elevator's state at any point in time
+
+|Column|Description|
+|---|---|
+|`start_time`|Start time of the state|
+|`state`|The state the elevator was in from `start_time` to `end_time`|
+|`end_time`|End time of the state|
+
+There are a few state the elevator can be in
+
+|State|Description|
+|---|---|
+|`Move.IDLE`|Idle State|
+|`Move.UP`|Lift is moving UP|
+|`Move.DOWN`|Lift is moving DOWN|
+|`Move.WAIT`|Lift is waiting but not on the IDLE floor yet|
+|`Move.WAIT_UPDATE`|Lift was recently triggered to move, was previously in IDLE/WAIT|
+|`Move.MOVE_TO_IDLE`|Lift is currently moving to the idle floor|
+
 ### Passengers
 
 # Basically the elevator operating algorithm
