@@ -18,6 +18,9 @@ class Event(ABC):
     def update(self):
         pass
 
+    def data_update(self):
+        return
+
     def __gt__(self, other):
         return self.time > other.time or self.priority.value > other.priority.value
 

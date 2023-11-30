@@ -1,3 +1,44 @@
+# How to run simulation
+
+Refer to `main.py` for an example
+
+After activating the `venv`, change directory into `simulation` folder and run `py main.py`
+
+## Simple Initialization
+
+```python
+simulation = Simulation(num_floors)
+
+for idx, cycle_data in enumerate(simulation.simulate(duration)):
+    # DO THINGS WITH CYCLE_DATA
+    print("cycle:", idx)
+    print("passenger dataframe")
+    print(cycle_data.passengers.head())
+```
+
+## Endpoints for Analysis
+
+`Simulation.simulate()` is a generator object that will yield `DataStore` objects at the end of each cycle.
+
+### DataStore Object Attributes
+
+#### `passengers`
+
+`passengers` is a pandas dataframe that has the following attributes for each passenger in the cycle.
+
+|Column|Description|
+|---|---|
+|`spawn_time`|Time passenger was spawned into the system|
+|`source`|Floor that the passenger was spawned on|
+|`dest`|Floor that the passenger wants to go to|
+|`board_time`|Time passenger boarded the lift|
+|`exit_time`|Time passenger left the system|
+|`wait_time`|Difference between `board_time` and `spawn_time`|
+|`lift_time`|Difference between `exit_time` and `board_time`|
+|`sys_time`|Difference between `exit_time` and `spawn_time`|
+
+### Passengers
+
 # Basically the elevator operating algorithm
 ## Sequence of events when it reaches the correct floor
 CONDITION: elevator is moving in direction up
@@ -51,3 +92,7 @@ CONDITION: elevator is moving in direction up
 
 16. And also add event to trigger the movement to Idle
 
+
+# Things to Update
+- Add ArgParser for simulation
+- Print cycle data into a .csv file
