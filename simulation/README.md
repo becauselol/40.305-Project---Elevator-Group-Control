@@ -15,12 +15,31 @@ for idx, cycle_data in enumerate(simulation.simulate(duration)):
     print("passenger dataframe")
     print(cycle_data.passengers.head())
 ```
+## Cycle Definition
+
+A cycle is defined as between `ReachIdleEvent`.
+
+This event signifies that the elevator has reached its idle state at a specified floor.
+
+Thus a cycle will almost always start with a period of time the elevator is in IDLE for, then it will be triggered by a `ArrivalEvent` and be made to move.
 
 ## Endpoints for Analysis
 
 `Simulation.simulate()` is a generator object that will yield `DataStore` objects at the end of each cycle.
 
 ### DataStore Object Attributes
+
+#### `start_time`
+
+Float value indicating the start time of the cycle
+
+#### `end_time`
+
+Float value indicatint the end time of the cycle
+
+#### `cycle_duration`
+
+Difference between `end_time` and `start_time`
 
 #### `passengers`
 

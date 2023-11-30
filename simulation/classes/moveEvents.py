@@ -116,7 +116,7 @@ class DoorCloseEvent(MoveEvent):
         if new_direction == Move.WAIT:
             self.elevator.direction = Move.WAIT
             if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
-                self.elevator.direction = Move.IDLE
+                yield ReachIdleEvent(self.time, self.floor, self.building)
                 return
             else:
                 yield MoveIdleEvent(

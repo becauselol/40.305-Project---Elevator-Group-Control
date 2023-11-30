@@ -12,7 +12,7 @@ class Simulation:
     def __init__(self, num_floors):
         self.num_floors = num_floors
         self.event_queue = []
-        self.cycle_data = DataStore(self.num_floors)
+        self.cycle_data = DataStore(self.num_floors, 0)
 
     def initialize_building(self):
         self.building = Building(self.num_floors)
@@ -44,8 +44,8 @@ class Simulation:
 
         heapify(self.event_queue)
         
-    def reset_cycle_data(self):
-        self.cycle_data = DataStore(self.num_floors)
+    def reset_cycle_data(self, time):
+        self.cycle_data = DataStore(self.num_floors, time)
 
     def simulate(self, max_time):
 
@@ -79,13 +79,13 @@ class Simulation:
             if removed_passengers:
                 self.cycle_data.update_passengers(removed_passengers)
 
-            if self.elevator.direction == Move.IDLE:
+            if isinstance(event, moveE.ReachIdleEvent):
                 count += 1
                 # yield the cycle data
-                self.cycle_data.finalize()
+                self.cycle_data.finalize(event_time)
                 yield self.cycle_data
 
-                self.reset_cycle_data()
+                self.reset_cycle_data(event_time)
 
         print("NUMBER OF CYCLES")
         print(count)

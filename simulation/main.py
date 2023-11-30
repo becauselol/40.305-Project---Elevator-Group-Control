@@ -10,4 +10,5 @@ sim = Simulation(num_floors)
 
 for idx, cycle_data in enumerate(sim.simulate(simulation_duration)):
     print("cycle:", idx)
+    print("cycle duration:", cycle_data.cycle_duration)
     print(cycle_data.passengers.head())
