@@ -32,3 +32,8 @@ Various argparsers will be implemented soon to specify features of the simulatio
 
 Code for the analysis can be found in `/analysis`.
 
+## Running interactively with Jupyter Notebook
+
+A sample jupyter notebook is shown in `interactive_analysis.ipynb`
+The simulation can be imported as shown in the notebook.
+
