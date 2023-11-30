@@ -1,5 +1,5 @@
 import pytest
-from simulation.classes.controller import EqualController, Move
+from ..simulation.classes.controller import EqualController, Move
 
 def test_controller_get_closest_up():
     num_floors = 4 

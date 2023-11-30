@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from simulation.simulation import Simulation
+from simulation.classes.sim import Simulation
 
 def homogeneous_analysis():
     random.seed(1)
