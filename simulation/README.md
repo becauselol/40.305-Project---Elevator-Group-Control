@@ -9,7 +9,7 @@ After activating the `venv`, change directory into `simulation` folder and run `
 ```python
 simulation = Simulation(num_floors)
 
-for idx, cycle_data in enumerate(sim.simulate(duration)):
+for idx, cycle_data in enumerate(simulation.simulate(duration)):
     # DO THINGS WITH CYCLE_DATA
     print("cycle:", idx)
     print("passenger dataframe")
