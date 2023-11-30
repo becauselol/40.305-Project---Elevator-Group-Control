@@ -1,6 +1,8 @@
 from heapq import heappop, heappush, heapify
 from numpy.random import exponential
 
+from simulation.classes import elevator
+
 from .building import Building
 from . import passengerEvents as passE
 from . import moveEvents as moveE
@@ -44,8 +46,8 @@ class Simulation:
 
         heapify(self.event_queue)
         
-    def reset_cycle_data(self, time):
-        self.cycle_data = DataStore(self.num_floors, time)
+    def reset_cycle_data(self, time, elevator_state):
+        self.cycle_data = DataStore(self.num_floors, time, elevator_state)
 
     def simulate(self, max_time):
 
@@ -65,15 +67,24 @@ class Simulation:
             # print(event)
             # print(self.elevator.get_num_passengers())
             # print(self.elevator.direction)
+
+            previous_elevator_state = self.elevator.direction
+
+            # RUN the updates and create any new events as required
             for new_event in event.update():
 
-            # TODO NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
+            # NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
                 if isinstance(new_event, moveE.UpdateMoveEvent):
                     # remove any existing MoveIdleEvent 
                     new_queue = [(t, e) for t, e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
                     self.event_queue = new_queue
+
                 heappush(self.event_queue, (new_event.time, new_event))
 
+            new_elevator_state = self.elevator.direction
+
+            if previous_elevator_state != new_elevator_state:
+                self.cycle_data.update_elevator_state(event_time, new_elevator_state)
 
             removed_passengers = event.data_update()
             if removed_passengers:
@@ -85,7 +96,7 @@ class Simulation:
                 self.cycle_data.finalize(event_time)
                 yield self.cycle_data
 
-                self.reset_cycle_data(event_time)
+                self.reset_cycle_data(event_time, self.elevator.direction)
 
         print("NUMBER OF CYCLES")
         print(count)
