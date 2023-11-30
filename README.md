@@ -18,3 +18,17 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
+## Running the simulation
+
+To run the simulation, simply run 
+
+```shell
+python main.py
+```
+
+from the main project folder
+
+Various argparsers will be implemented soon to specify features of the simulation
+
+Code for the analysis can be found in `/analysis`.
+

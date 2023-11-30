@@ -1,5 +1,5 @@
 from _pytest.compat import num_mock_patch_args
-from controller import EqualController, Move
+from ..simulation.classes.controller import EqualController, Move
 
 def test_int_call_up():
     num_floors = 4

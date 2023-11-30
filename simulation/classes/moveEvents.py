@@ -1,6 +1,6 @@
-from classes.event import MoveEvent
-import classes.passengerEvents as passE
-from classes.controller import Move
+from .event import MoveEvent
+from . import passengerEvents as passE
+from .controller import Move
 
 """
 NOTE: time is the time that the event occurs

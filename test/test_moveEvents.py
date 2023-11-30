@@ -1,8 +1,8 @@
-import moveEvents as moveE
-import passengerEvents as passE
-from building import Building
-from controller import Move
-from passenger import Passenger
+from ..simulation.classes import moveEvents as moveE
+from ..simulation.classes import passengerEvents as passE
+from ..simulation.classes.building import Building
+from ..simulation.classes.controller import Move
+from ..simulation.classes.passenger import Passenger
 
 class TestNextFloorEvent:
     def test_open_door(self):

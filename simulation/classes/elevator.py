@@ -1,4 +1,4 @@
-from classes.controller import Move
+from .controller import Move
 
 
 class Elevator:

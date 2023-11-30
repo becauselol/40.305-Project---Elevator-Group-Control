@@ -1,9 +1,9 @@
 import numpy as np
 
-from classes.event import PassengerEvent
-from classes.controller import Move
-import classes.moveEvents as moveE
-from classes.passenger import Passenger
+from .event import PassengerEvent
+from .controller import Move
+from . import moveEvents as moveE
+from .passenger import Passenger
 
 class ArrivalEvent(PassengerEvent):
 # need to add the external call
