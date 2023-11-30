@@ -62,6 +62,7 @@ class Simulation:
             # print(self.elevator.get_num_passengers())
             if self.elevator.direction == Move.IDLE:
                 count += 1
+                # yield the cycle data
             # print(self.elevator.direction)
             for new_event in event.update():
 

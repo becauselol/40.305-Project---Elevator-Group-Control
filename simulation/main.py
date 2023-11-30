@@ -6,4 +6,4 @@ random.seed(1)
 np.random.seed(1)
 sim = Simulation()
 
-sim.simulate(4590)
+sim.simulate(24 * 60 * 5)
