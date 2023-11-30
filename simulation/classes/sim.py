@@ -14,12 +14,13 @@ class Simulation:
     def __init__(self, num_floors):
         self.num_floors = num_floors
         self.event_queue = []
-        self.cycle_data = DataStore(self.num_floors, 0)
 
     def initialize_building(self):
         self.building = Building(self.num_floors)
         self.elevator = self.building.elevator
         self.controller = self.building.controller
+
+        self.cycle_data = DataStore(self.num_floors, 0, self.elevator.direction)
         
 
     def initialize_arrivals(self, rate_matrix):
