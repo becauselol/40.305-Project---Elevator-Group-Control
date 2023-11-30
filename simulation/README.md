@@ -19,7 +19,9 @@ for idx, cycle_data in enumerate(simulation.simulate(duration)):
 
 A cycle is defined as between `ReachIdleEvent`.
 
-This event signifies that the elevator has reached its idle state at a specified floor
+This event signifies that the elevator has reached its idle state at a specified floor.
+
+Thus a cycle will almost always start with a period of time the elevator is in IDLE for, then it will be triggered by a `ArrivalEvent` and be made to move.
 
 ## Endpoints for Analysis
 
