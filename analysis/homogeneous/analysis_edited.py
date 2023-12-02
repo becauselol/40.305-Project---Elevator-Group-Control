@@ -28,7 +28,7 @@ def output_to_array(df):
     
     for idx, cycle_data in enumerate(df):
         cycles.append(cycle_data.cycle_duration)
-        wait_time.append(cycle_data.passengers['wait_time'].mean())
+        wait_time.append(cycle_data.passengers['wait_time'].sum())
         no_passenger.append(len(cycle_data.passengers))
 
     rewards['wait_t'] = wait_time
@@ -46,6 +46,8 @@ def calculate_expected(C, R):
     
     # expectation estimate
     result["steady state average"] = result["expected reward"] / result["expected cycle length"]
+    
+
     
     # variance estimate
     result["np cov"] =  np.cov(R, C)
