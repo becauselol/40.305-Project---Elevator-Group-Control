@@ -17,21 +17,23 @@ def homogeneous_analysis():
         print("cycle duration:", cycle_data.cycle_duration)
         print(cycle_data.passengers.head())
 
+        
+def output_to_array(df):
     
-    return [cycles, rewards]
-    
-def output():
-    random.seed(1)
-    np.random.seed(1)
-    num_floors = 4
-    simulation_duration = 24 * 60 * 5
-    sim = Simulation(num_floors)
     cycles = []
-    rewards = []
+    rewards = {}
+    wait_time = []
+    no_passenger = []
+
     
-    for idx, cycle_data in enumerate(sim.simulate(simulation_duration)):
+    for idx, cycle_data in enumerate(df):
         cycles.append(cycle_data.cycle_duration)
-        rewards.append(cycle_data.passengers['sys_time'].sum())
+        wait_time.append(cycle_data.passengers['wait_time'].mean())
+        no_passenger.append(len(cycle_data.passengers))
+
+    rewards['wait_t'] = wait_time
+    rewards['num_passenger'] = no_passenger 
+
     
     return [cycles, rewards]
 
