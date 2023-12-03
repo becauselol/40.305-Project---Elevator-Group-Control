@@ -3,6 +3,8 @@ from scipy import stats
 import numpy as np
 import random
 from simulation.classes.sim import Simulation
+from simulation.classes.controller import Move
+
 
 def homogeneous_analysis():
     random.seed(1)
@@ -24,6 +26,7 @@ def output_to_array(df):
     rewards = {}
     wait_time = []
     no_passenger = []
+    idle_t = []
 
     
     for idx, cycle_data in enumerate(df):
@@ -31,8 +34,15 @@ def output_to_array(df):
         wait_time.append(cycle_data.passengers['wait_time'].sum())
         no_passenger.append(len(cycle_data.passengers))
 
+        # finding idle time of each cycle
+        end_idle = cycle_data.elevator_state['end_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
+        start_idle = cycle_data.elevator_state['start_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
+        idle = end_idle - start_idle
+        idle_t.append(idle.sum())
+
     rewards['wait_t'] = wait_time
     rewards['num_passenger'] = no_passenger 
+    rewards['idle_time'] = idle_t
 
     
     return [cycles, rewards]
