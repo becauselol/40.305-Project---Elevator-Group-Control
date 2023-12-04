@@ -1,17 +1,35 @@
 # HELPs recognize this as the main folder in the package
+import numpy as np
+import random
+from simulation.classes.sim import Simulation
 
-from analysis.homogeneous.analysis import homogeneous_analysis
+from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward
 
 if __name__ == "__main__":
-    random.seed(1)
-    np.random.seed(1)
+    print("STARTING SIMULATION")
+    seed = 1
+    random.seed(seed)
+    np.random.seed(seed)
     num_floors = 4
-    simulation_duration = 24 * 60 * 5
+    simulation_duration = 72000
     sim = Simulation(num_floors)
 
+    print("simulation duration:", simulation_duration)
+
     
+    simulation_data = []
+
     for idx, cycle_data in enumerate(sim.simulate(simulation_duration)):
-        print("cycle:", idx)
-        print("cycle duration:", cycle_data.cycle_duration)
-        print(cycle_data.passengers.head())
+        # print("cycle:", idx)
+        # print("cycle duration:", cycle_data.cycle_duration)
+        simulation_data.append(cycle_data)
+
+    print("Total Number of Cycles:", len(simulation_data))
+
+    cycle_len_arr, reward_dict = convert_to_reward(simulation_data)
+
+    for reward, values in reward_dict.items():
+        result = calculate_expected_reward(cycle_len_arr, values)
+
+        print_res(result, reward)
 

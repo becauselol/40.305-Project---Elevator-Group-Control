@@ -91,7 +91,7 @@ Arrays are C and R that need to be of equal length
 
 def print_res(result, variable_name = ""):
     print(f"""---
-Results :{variable_name}
+Results : {variable_name}
 ---
 Expectation Estimate: {result["steady state average"]:.6f}
 Variance Estimate   : {result["sample variance"]:.6f}
