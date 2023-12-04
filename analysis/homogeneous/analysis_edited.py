@@ -20,35 +20,41 @@ def homogeneous_analysis():
         print(cycle_data.passengers.head())
 
         
-def output_to_array(df):
+def convert_to_reward(simulation_data):
+    """simulation_data is an array of dataframes"""
     
     cycles = []
     rewards = {}
     wait_time = []
-    no_passenger = []
-    idle_t = []
+    num_passenger = []
+    idle_time = []
 
     
-    for idx, cycle_data in enumerate(df):
+    for idx, cycle_data in enumerate(simulation_data):
         cycles.append(cycle_data.cycle_duration)
         wait_time.append(cycle_data.passengers['wait_time'].sum())
-        no_passenger.append(len(cycle_data.passengers))
+        num_passenger.append(len(cycle_data.passengers))
 
         # finding idle time of each cycle
         end_idle = cycle_data.elevator_state['end_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
         start_idle = cycle_data.elevator_state['start_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
         idle = end_idle - start_idle
-        idle_t.append(idle.sum())
+        idle_time.append(idle.sum())
 
-    rewards['wait_t'] = wait_time
-    rewards['num_passenger'] = no_passenger 
-    rewards['idle_time'] = idle_t
+    rewards['wait_time'] = wait_time
+    rewards['num_passenger'] = num_passenger 
+    rewards['idle_time'] = idle_time
 
     
     return [cycles, rewards]
 
-def calculate_expected(C, R):
-    alpha = 0.05 
+def calculate_expected_reward(C, R, alpha=0.05):
+    """Takes in 2 arrays and a level of significance alpha
+Arrays are C and R that need to be of equal length
+    
+    """
+    assert len(C) == len(R)
+
     n = len(C)
     result = {}
     result["expected reward"] = np.mean(R)
@@ -81,3 +87,14 @@ def calculate_expected(C, R):
     
     
     return result
+
+
+def print_res(result, variable_name = ""):
+    print(f"""---
+Results :{variable_name}
+---
+Expectation Estimate: {result["steady state average"]:.6f}
+Variance Estimate   : {result["sample variance"]:.6f}
+Confidence Interval : [{result["lower interval"]:.6f}, {result["upper interval"]:.6f}]
+    
+    """)
