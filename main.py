@@ -6,7 +6,7 @@ from simulation.classes.sim import Simulation
 from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward
 
 if __name__ == "__main__":
-    print("STARTING SIMULATION")
+    print("INITIALIZING SIMULATION")
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
@@ -14,8 +14,11 @@ if __name__ == "__main__":
     simulation_duration = 72000
     sim = Simulation(num_floors)
 
+    print("random seed:", seed)
     print("simulation duration:", simulation_duration)
+    print("number of floors:", num_floors)
 
+    print("STARTING SIMULATION")
     
     simulation_data = []
 
