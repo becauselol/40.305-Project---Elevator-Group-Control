@@ -98,6 +98,3 @@ class Simulation:
                 yield self.cycle_data
 
                 self.reset_cycle_data(event_time, self.elevator.direction)
-
-        print("NUMBER OF CYCLES")
-        print(count)
