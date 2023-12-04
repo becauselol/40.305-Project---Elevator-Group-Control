@@ -46,7 +46,7 @@ def convert_to_reward(simulation_data):
     rewards['idle_time'] = idle_time
 
     
-    return [cycles, rewards]
+    return cycles, rewards
 
 def calculate_expected_reward(C, R, alpha=0.05):
     """Takes in 2 arrays and a level of significance alpha
