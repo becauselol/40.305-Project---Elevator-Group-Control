@@ -1,4 +1,5 @@
 # HELPs recognize this as the main folder in the package
+import time
 import numpy as np
 import random
 from simulation.classes.sim import Simulation
@@ -6,7 +7,7 @@ from simulation.classes.sim import Simulation
 from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward
 
 if __name__ == "__main__":
-    print("INITIALIZING SIMULATION")
+    print("INITIALIZING SIMULATION\n")
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
@@ -18,7 +19,8 @@ if __name__ == "__main__":
     print("simulation duration:", simulation_duration)
     print("number of floors:", num_floors)
 
-    print("STARTING SIMULATION")
+    start_time = time.time()
+    print(f"\nSTARTING SIMULATION\n")
     
     simulation_data = []
 
@@ -26,6 +28,11 @@ if __name__ == "__main__":
         # print("cycle:", idx)
         # print("cycle duration:", cycle_data.cycle_duration)
         simulation_data.append(cycle_data)
+
+    end_time = time.time()
+    print(f"ENDING SIMULATION\n")
+    print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
+
 
     print("Total Number of Cycles:", len(simulation_data))
 
