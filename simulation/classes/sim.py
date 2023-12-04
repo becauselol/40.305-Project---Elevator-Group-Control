@@ -50,9 +50,14 @@ class Simulation:
     def reset_cycle_data(self, time, elevator_state):
         self.cycle_data = DataStore(self.num_floors, time, elevator_state)
 
+    def reset_simulation(self):
+        self.event_queue = []
+
     def simulate(self, max_time):
+        self.reset_simulation()
 
         self.initialize_building()
+        self.reset_cycle_data(0, self.elevator.direction)
 
         uniform_rate = 20
         rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
