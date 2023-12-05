@@ -2,7 +2,8 @@ from .controller import Move
 
 
 class Elevator:
-    def __init__(self, num_floors, capacity=float("inf"), idle_floor=1):
+    def __init__(self, id, num_floors, capacity=float("inf"), idle_floor=1):
+        self.id = id
         self.num_floors = num_floors
         self.capacity = capacity
         self.direction = Move.IDLE

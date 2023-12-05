@@ -10,7 +10,7 @@ class Building:
         self.max_floor = num_floors
         self.groupController = GroupController(num_floors)
 
-        self.elevators = {}
+        self.elevators = {id: controller.elevator for id, controller in self.groupController.liftControllers.items()}
 
         self.waiting_people = [
                 {

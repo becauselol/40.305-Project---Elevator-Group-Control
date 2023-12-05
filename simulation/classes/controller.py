@@ -57,11 +57,12 @@ class Controller(ABC):
         pass
 
 class LiftController(Controller):
-    def __init__(self, num_floors):
+    def __init__(self, id, num_floors):
+        self.id = id
         self.name = "Lift Controller"
         self.idle_floor = 1
         self.num_floors = num_floors
-        self.elevator = Elevator(self.num_floors)
+        self.elevator = Elevator(self.id, self.num_floors)
 
         # This is now an assigned external call
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]

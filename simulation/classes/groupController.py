@@ -12,7 +12,7 @@ class GroupController:
         self.state = State.IDLE
         self.num_floors = num_floors
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
-        self.liftController = [LiftController(self.num_floors)] * num_elevators
+        self.liftController = {i: LiftController(i, self.num_floors) for i in range(1, num_elevators + 1)}
         if idle_floors:
             self.idle_floors = idle_floors
         else:
@@ -21,9 +21,14 @@ class GroupController:
 
     def add_ext_call(self, floor_call, direction, time):
         if direction == Move.UP:
+            if self.ext_call[floor_call - 1].up_call:
+                return False
             self.ext_call[floor_call - 1].set_up_call(time)
         elif direction == Move.DOWN:
+            if self.ext_call[floor_call - 1].down_call:
+                return False
             self.ext_call[floor_call - 1].set_down_call(time)
+        return True
 
     def consume_ext_call(self, floor, move_direction):
         if move_direction == Move.UP:
@@ -36,7 +41,7 @@ class GroupController:
     def request_is_empty(self):
         return self.liftController[0].request_is_empty()
 
-    def respond_new_ext_call(self, floor_call, direction, time):
+    def assign_call(self, floor_call, direction, time):
         """
         Assigns the new external call to a specific liftController
 
@@ -51,5 +56,7 @@ class GroupController:
         - The calls registered for each elevator
         """
         # Everything is assigned to the first one, should be correct
-        self.liftController[0].add_ext_call(floor_call, direction, time)
-        pass
+        return 1
+
+    def add_ext_call_to_lift(self, lift_id, floor_call, direction, time):
+        self.liftController[lift_id].add_ext_call(floor_call, direction, time)

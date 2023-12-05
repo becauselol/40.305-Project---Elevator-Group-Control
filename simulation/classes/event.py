@@ -29,8 +29,7 @@ class PassengerEvent(Event):
         super().__init__(time, Priority.PASSENGER)
         self.floor = floor
         self.building = building
-        self.elevator = self.building.elevator
-        self.controller = self.building.controller
+        self.groupController = self.building.groupController
 
     def __str__(self):
         return f"{super().__str__()}{self.describe()}"
@@ -42,6 +41,22 @@ class PassengerEvent(Event):
     @abstractmethod
     def update(self):
         pass
+
+class PassengerElevatorEvent(PassengerEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building)
+        self.elevator_id = elevator_id
+        self.elevator = self.building.elevators[elevator_id]
+        self.controller = self.building.groupController.controllers[elevator_id]
+
+    @abstractmethod
+    def describe(self):
+        pass
+
+    @abstractmethod
+    def update(self):
+        pass
+
 
 class MoveEvent(Event):
     def __init__(self, time, floor, building):

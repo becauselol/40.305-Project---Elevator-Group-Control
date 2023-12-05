@@ -1,4 +1,4 @@
-from .event import MoveEvent
+from .event import MoveEvent, ElevatorEvent
 from . import passengerEvents as passE
 from .controller import Move
 
@@ -215,9 +215,17 @@ class UpdateMoveEvent(ElevatorEvent):
 #       If this scenario occurs and the elevator was in WAIT,
 #       Then the lift's MoveIdleEvent needs to be cleared
 #   Or an already moving elevator is assigned to the call
-class GroupControllerUpdate(MoveEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+#class GroupControllerUpdate(MoveEvent):
+#    def __init__(self, time, floor, building):
+#        super().__init__(time, floor, building)
+#
+#    def describe(self):
+#        return f"GroupController deciding which elevator to assign call to"
+#
+#    def update(self):
+#        self.groupController.respond_new_ext_call()
+#        yield UpdateMoveEvent(self.time, self.elevator.floor, )
+
 
 
 
