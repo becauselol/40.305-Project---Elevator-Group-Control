@@ -1,5 +1,5 @@
-
-from .controller import GroupController, Move
+from .groupController import GroupController
+from .controller import Move
 from .elevator import Elevator
 
 
@@ -8,7 +8,7 @@ class Building:
         self.num_floors = num_floors
         self.min_floor = min_floor
         self.max_floor = num_floors
-        self.groupController = GroupController(num_floors)
+        self.groupController = GroupController(num_floors, 1)
 
         self.elevators = {id: controller.elevator for id, controller in self.groupController.liftControllers.items()}
 
@@ -34,9 +34,9 @@ class Building:
         self.waiting_people[floor - 1][passenger.get_direction()].append(passenger)
 
 
-    def remove_passenger_from_elevator(self, floor):
-        self.alighted_people[floor - 1] = self.elevator.get_alighting(floor)
-        self.elevator.clear_alighting(floor)
+    def remove_passenger_from_elevator(self, elevator_id, floor):
+        self.alighted_people[floor - 1] = self.elevators[elevator_id].get_alighting(floor)
+        self.elevators[elevator_id].clear_alighting(floor)
 
 
     def remove_passenger_from_building(self, floor, time):
@@ -49,17 +49,17 @@ class Building:
         return removed_passengers
 
     
-    def add_passenger_to_elevator(self, floor, move_direction, time):
+    def add_passenger_to_elevator(self, elevator_id, floor, move_direction, time):
         int_calls = set()
         remaining_passengers = []
 
         for passenger in self.waiting_people[floor - 1][move_direction]:
-            if self.elevator.get_num_passengers() >= self.elevator.capacity:
+            if self.elevators[elevator_id].get_num_passengers() >= self.elevators[elevator_id].capacity:
                 remaining_passengers.append(passenger)
                 continue
 
             passenger.set_board_time(time)
-            self.elevator.add_passenger(passenger)
+            self.elevators[elevator_id].add_passenger(passenger)
             int_calls.add(passenger.dest)
 
         self.waiting_people[floor - 1][move_direction] = remaining_passengers

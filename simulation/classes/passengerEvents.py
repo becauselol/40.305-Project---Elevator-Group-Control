@@ -58,7 +58,7 @@ class AlightEvent(PassengerElevatorEvent):
 
 # will delete the internal calls
     def update(self):
-        self.building.remove_passenger_from_elevator(self.floor)
+        self.building.remove_passenger_from_elevator(self.elevator_id, self.floor)
         yield DepartureEvent(self.time, self.floor, self.building)
 
 
@@ -92,7 +92,7 @@ class BoardEvent(PassengerElevatorEvent):
     def update(self):
 
         # board people
-        internal_calls = self.building.add_passenger_to_elevator(self.floor, self.elevator.direction, self.time)
+        internal_calls = self.building.add_passenger_to_elevator(self.elevator_id, self.floor, self.elevator.direction, self.time)
 
         # CODE SHOULD BE IRRELEVANT SINCE ASSUMPTION IS ELEVATOR IS INFINITELY LARGE
         # if there are any more ppl waiting, we add ext call again

@@ -47,7 +47,7 @@ class PassengerElevatorEvent(PassengerEvent):
         super().__init__(time, floor, building)
         self.elevator_id = elevator_id
         self.elevator = self.building.elevators[elevator_id]
-        self.controller = self.building.groupController.controllers[elevator_id]
+        self.controller = self.building.groupController.liftControllers[elevator_id]
 
     @abstractmethod
     def describe(self):
@@ -81,7 +81,7 @@ class ElevatorEvent(MoveEvent):
         super().__init__(time, floor, building)
         self.elevator_id = elevator_id
         self.elevator = self.building.elevators[elevator_id]
-        self.controller = self.building.groupController.controllers[elevator_id]
+        self.controller = self.building.groupController.liftControllers[elevator_id]
 
     @abstractmethod
     def describe(self):

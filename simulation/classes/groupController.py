@@ -12,7 +12,7 @@ class GroupController:
         self.state = State.IDLE
         self.num_floors = num_floors
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
-        self.liftController = {i: LiftController(i, self.num_floors) for i in range(1, num_elevators + 1)}
+        self.liftControllers = {i: LiftController(i, self.num_floors) for i in range(1, num_elevators + 1)}
         if idle_floors:
             self.idle_floors = idle_floors
         else:
@@ -59,4 +59,4 @@ class GroupController:
         return 1
 
     def add_ext_call_to_lift(self, lift_id, floor_call, direction, time):
-        self.liftController[lift_id].add_ext_call(floor_call, direction, time)
+        self.liftControllers[lift_id].add_ext_call(floor_call, direction, time)

@@ -17,10 +17,10 @@ class Simulation:
 
     def initialize_building(self):
         self.building = Building(self.num_floors)
-        self.elevator = self.building.elevator
-        self.controller = self.building.controller
+        self.elevators = self.building.elevators
+        self.controller = self.building.groupController
 
-        self.cycle_data = DataStore(self.num_floors, 0, self.elevator.direction)
+        self.cycle_data = DataStore(self.num_floors, 0, self.elevators[1].direction)
         
 
     def initialize_arrivals(self, rate_matrix):
@@ -57,7 +57,7 @@ class Simulation:
         self.reset_simulation()
 
         self.initialize_building()
-        self.reset_cycle_data(0, self.elevator.direction)
+        self.reset_cycle_data(0, self.elevators[1].direction)
 
         uniform_rate = 20
         rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
@@ -69,12 +69,12 @@ class Simulation:
 
             event_time, event = heappop(self.event_queue)
 
-            # if self.elevator.direction == Move.IDLE:
+            # if self.elevators[1].direction == Move.IDLE:
             # print(event)
-            # print(self.elevator.get_num_passengers())
-            # print(self.elevator.direction)
+            # print(self.elevators[1].get_num_passengers())
+            # print(self.elevators[1].direction)
 
-            previous_elevator_state = self.elevator.direction
+            previous_elevator_state = self.elevators[1].direction
 
             # RUN the updates and create any new events as required
             for new_event in event.update():
@@ -87,7 +87,7 @@ class Simulation:
 
                 heappush(self.event_queue, (new_event.time, new_event))
 
-            new_elevator_state = self.elevator.direction
+            new_elevator_state = self.elevators[1].direction
 
             if previous_elevator_state != new_elevator_state:
                 self.cycle_data.update_elevator_state(event_time, new_elevator_state)
@@ -102,4 +102,4 @@ class Simulation:
                 self.cycle_data.finalize(event_time)
                 yield self.cycle_data
 
-                self.reset_cycle_data(event_time, self.elevator.direction)
+                self.reset_cycle_data(event_time, self.elevators[1].direction)
