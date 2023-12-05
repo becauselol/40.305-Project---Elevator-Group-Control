@@ -1,5 +1,5 @@
 
-from .controller import EqualController, Move
+from .controller import GroupController, Move
 from .elevator import Elevator
 
 
@@ -8,8 +8,9 @@ class Building:
         self.num_floors = num_floors
         self.min_floor = min_floor
         self.max_floor = num_floors
-        self.elevator = Elevator(num_floors)
-        self.controller = EqualController(num_floors)
+        self.groupController = GroupController(num_floors)
+
+        self.elevators = {}
 
         self.waiting_people = [
                 {

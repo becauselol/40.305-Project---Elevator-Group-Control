@@ -58,9 +58,12 @@ NOTE: time is the time that the event occurs
 
 """
 
-class NextFloorEvent(MoveEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+# These events are specific to a certain elevator
+# Each event now needs to take in a new parameter
+# The elevator ID
+class NextFloorEvent(ElevatorEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Elevator floor {self.elevator.floor} -> {self.floor}"
@@ -70,19 +73,19 @@ class NextFloorEvent(MoveEvent):
         next_floor = self.controller.where_next_moving(self.elevator.floor, self.elevator.direction)
 
         if next_floor == self.floor:
-            yield DoorOpenEvent(self.time, self.floor, self.building)
+            yield DoorOpenEvent(self.time, self.floor, self.building, self.elevator_id)
             return
             # yield a door open event
 
         yield NextFloorEvent(
                 self.time + self.elevator.move_speed,
                 self.floor + self.elevator.direction.value,
-                self.building
+                self.building, self.elevator_id
             ) 
 
-class DoorOpenEvent(MoveEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+class DoorOpenEvent(ElevatorEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Elevator opening door at {self.floor}"
@@ -95,16 +98,16 @@ class DoorOpenEvent(MoveEvent):
         # Check if anyone alighting
         if self.elevator.check_alighting(self.floor):
             # trigger an alight event
-            yield passE.AlightEvent(self.time, self.floor, self.building)
+            yield passE.AlightEvent(self.time, self.floor, self.building, self.elevator_id)
 
         # always try to board even if there is no one this is so we will check
-        yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building)
+        yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
 
 
 
-class DoorCloseEvent(MoveEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+class DoorCloseEvent(ElevatorEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Elevator closing door at {self.floor}"
@@ -116,35 +119,32 @@ class DoorCloseEvent(MoveEvent):
         if new_direction == Move.WAIT:
             self.elevator.direction = Move.WAIT
             if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
-                yield ReachIdleEvent(self.time, self.floor, self.building)
+                yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)
                 return
             else:
                 yield MoveIdleEvent(
                         self.time + self.elevator.wait_to_idle,
                         self.floor,
-                        self.building
+                        self.building, self.elevator_id
                         )
                 return        
         elif self.elevator.direction == new_direction and new_direction != Move.WAIT:
             yield NextFloorEvent(
                     self.time + self.elevator.move_speed,
                     self.floor + self.elevator.direction.value,
-                    self.building
+                    self.building, self.elevator_id
                     )
             return
         elif self.elevator.direction != new_direction:
             self.elevator.direction = new_direction
-            yield DoorOpenEvent(self.time, self.floor, self.building)
+            yield DoorOpenEvent(self.time, self.floor, self.building, self.elevator_id)
             return
 
 
-
-  
-
                 
-class MoveIdleEvent(MoveEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+class MoveIdleEvent(ElevatorEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Moving to IDLE floor {self.controller.get_idle_floor(self.elevator)}"
@@ -159,12 +159,12 @@ class MoveIdleEvent(MoveEvent):
         time_to_move_to_idle = self.controller.time_to_idle_floor(self.elevator)
         idle_floor = self.controller.get_idle_floor(self.elevator)
 
-        yield ReachIdleEvent(self.time + time_to_move_to_idle , idle_floor, self.building)
+        yield ReachIdleEvent(self.time + time_to_move_to_idle , idle_floor, self.building, self.elevator_id)
 
 
-class ReachIdleEvent(MoveEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+class ReachIdleEvent(ElevatorEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Reached the IDLE state at {self.floor}"
@@ -176,16 +176,16 @@ class ReachIdleEvent(MoveEvent):
         # check if there are any calls
         # If yes, we should do a NextFloor
         if not self.controller.request_is_empty():
-            yield UpdateMoveEvent(self.time, self.floor, self.building)
+            yield UpdateMoveEvent(self.time, self.floor, self.building, self.elevator_id)
 
 
-class UpdateMoveEvent(MoveEvent):
+class UpdateMoveEvent(ElevatorEvent):
     """
     Only called when the lift is in IDLE/WAIT
     will allow respond to the closest
     """
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Elevator was in IDLE/WAIT, updating move"
@@ -205,10 +205,19 @@ class UpdateMoveEvent(MoveEvent):
         # now check where to move
         # does so by triggering a NextFloorEvent
         # without any delay
-        yield NextFloorEvent(self.time, self.elevator.floor, self.building)
+        yield NextFloorEvent(self.time, self.elevator.floor, self.building, self.elevator_id)
 
 
 
+# This EVENT is specific to the GroupController,
+# It should return the corresponding result
+#   New elevator could start moving
+#       If this scenario occurs and the elevator was in WAIT,
+#       Then the lift's MoveIdleEvent needs to be cleared
+#   Or an already moving elevator is assigned to the call
+class GroupControllerUpdate(MoveEvent):
+    def __init__(self, time, floor, building):
+        super().__init__(time, floor, building)
 
 
 

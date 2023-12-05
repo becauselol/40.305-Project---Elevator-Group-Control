@@ -34,9 +34,9 @@ class GroupController:
             self.ext_call[floor - 1].down_call_time = float("inf")
 
     def request_is_empty(self):
-        pass
+        return self.liftController[0].request_is_empty()
 
-    def respond_new_ext_call(self):
+    def respond_new_ext_call(self, floor_call, direction, time):
         """
         Assigns the new external call to a specific liftController
 
@@ -50,4 +50,6 @@ class GroupController:
         - Capacity in each elevator
         - The calls registered for each elevator
         """
+        # Everything is assigned to the first one, should be correct
+        self.liftController[0].add_ext_call(floor_call, direction, time)
         pass

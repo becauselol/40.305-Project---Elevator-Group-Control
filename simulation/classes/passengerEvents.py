@@ -37,6 +37,10 @@ class ArrivalEvent(PassengerEvent):
         yield self.next_arrival_event()
 
         # elevator will only be updated if it is in IDLE or WAIT
+        # Check with the groupController, if it is a new call
+        # If it is a new call that is not handled
+        # Then we need to assign the call to a lift
+        # It will yield some sort of GroupControllerUpdate
         if self.elevator.direction in [Move.IDLE, Move.WAIT]:
             self.elevator.direction = Move.WAIT_UPDATE
             yield moveE.UpdateMoveEvent(self.time, self.floor, self.building)

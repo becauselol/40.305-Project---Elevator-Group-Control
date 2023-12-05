@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from heapq import heappush, heappop
 from enum import Enum
 
+from .elevator import Elevator
+
 class Move(Enum):
     UP = 1
     DOWN = -1
@@ -58,6 +60,8 @@ class LiftController(Controller):
     def __init__(self, num_floors):
         self.name = "Lift Controller"
         self.idle_floor = 1
+        self.num_floors = num_floors
+        self.elevator = Elevator(self.num_floors)
 
         # This is now an assigned external call
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
