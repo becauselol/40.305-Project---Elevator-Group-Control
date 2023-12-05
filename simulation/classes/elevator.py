@@ -1,11 +1,12 @@
-from .controller import Move
+from . import controller 
 
 
 class Elevator:
-    def __init__(self, num_floors, capacity=float("inf"), idle_floor=1):
+    def __init__(self, id, num_floors, capacity=float("inf"), idle_floor=1):
+        self.id = id
         self.num_floors = num_floors
         self.capacity = capacity
-        self.direction = Move.IDLE
+        self.direction = controller.Move.IDLE
         self.floor = idle_floor
         self.move_speed = 1
         self.wait_to_idle = 1

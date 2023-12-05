@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from heapq import heappush, heappop
 from enum import Enum
 
+from . import elevator 
+
 class Move(Enum):
     UP = 1
     DOWN = -1
@@ -54,11 +56,15 @@ class Controller(ABC):
     def where_next_stationary(self):
         pass
 
-class EqualController(Controller):
-    def __init__(self, num_floors):
-        self.name = "Equal Controller"
+class LiftController(Controller):
+    def __init__(self, id, num_floors):
+        self.id = id
+        self.name = "Lift Controller"
         self.idle_floor = 1
+        self.num_floors = num_floors
+        self.elevator = elevator.Elevator(self.id, self.num_floors)
 
+        # This is now an assigned external call
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
 
         # These are the internal calls

@@ -1,6 +1,6 @@
 import numpy as np
 
-from .event import PassengerEvent
+from .event import PassengerEvent, PassengerElevatorEvent
 from .controller import Move
 from . import moveEvents as moveE
 from .passenger import Passenger
@@ -32,26 +32,33 @@ class ArrivalEvent(PassengerEvent):
         passenger = Passenger(self.time, self.source, self.dest)
         self.building.add_passenger_to_floor(self.floor, passenger)
         # add the external call accordingly
-        self.controller.add_ext_call(self.floor, passenger.get_direction(), self.time)
+        # check which elevator is this assigned to
+        assigned_elevator = self.groupController.assign_call(self.floor, passenger.get_direction(), self.time)
+
+        self.groupController.add_ext_call_to_lift(assigned_elevator, self.floor, passenger.get_direction(), self.time)
 
         yield self.next_arrival_event()
 
         # elevator will only be updated if it is in IDLE or WAIT
+        # Check with the groupController, if it is a new call
+        # If it is a new call that is not handled
+        # Then we need to assign the call to a lift
+        self.elevator = self.building.elevators[assigned_elevator]
         if self.elevator.direction in [Move.IDLE, Move.WAIT]:
             self.elevator.direction = Move.WAIT_UPDATE
-            yield moveE.UpdateMoveEvent(self.time, self.floor, self.building)
+            yield moveE.UpdateMoveEvent(self.time, self.floor, self.building, assigned_elevator)
 
 
-class AlightEvent(PassengerEvent):
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+class AlightEvent(PassengerElevatorEvent):
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Alighting {len(self.elevator.get_alighting(self.floor))} at {self.floor}"
 
 # will delete the internal calls
     def update(self):
-        self.building.remove_passenger_from_elevator(self.floor)
+        self.building.remove_passenger_from_elevator(self.elevator_id, self.floor)
         yield DepartureEvent(self.time, self.floor, self.building)
 
 
@@ -72,12 +79,12 @@ class DepartureEvent(PassengerEvent):
         return self.removed_passengers
 
 
-class BoardEvent(PassengerEvent):
+class BoardEvent(PassengerElevatorEvent):
 # will delete external calls
 # add internal calls
 # trigger NextFloorEvent
-    def __init__(self, time, floor, building):
-        super().__init__(time, floor, building)
+    def __init__(self, time, floor, building, elevator_id):
+        super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
         return f"Boarding {len(self.building.get_boarding(self.floor, self.elevator.direction))} at {self.floor}"
@@ -85,7 +92,7 @@ class BoardEvent(PassengerEvent):
     def update(self):
 
         # board people
-        internal_calls = self.building.add_passenger_to_elevator(self.floor, self.elevator.direction, self.time)
+        internal_calls = self.building.add_passenger_to_elevator(self.elevator_id, self.floor, self.elevator.direction, self.time)
 
         # CODE SHOULD BE IRRELEVANT SINCE ASSUMPTION IS ELEVATOR IS INFINITELY LARGE
         # if there are any more ppl waiting, we add ext call again
@@ -102,5 +109,6 @@ class BoardEvent(PassengerEvent):
         yield moveE.DoorCloseEvent(
                 self.time,
                 self.floor,
-                self.building
+                self.building,
+                self.elevator_id
                 )
