@@ -54,11 +54,12 @@ class Controller(ABC):
     def where_next_stationary(self):
         pass
 
-class EqualController(Controller):
+class LiftController(Controller):
     def __init__(self, num_floors):
-        self.name = "Equal Controller"
+        self.name = "Lift Controller"
         self.idle_floor = 1
 
+        # This is now an assigned external call
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
 
         # These are the internal calls
