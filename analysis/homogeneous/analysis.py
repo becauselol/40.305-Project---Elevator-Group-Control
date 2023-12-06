@@ -3,6 +3,7 @@ from scipy import stats
 import numpy as np
 import random
 import pandas as pd
+from collections import defaultdict 
 from simulation.classes.sim import Simulation
 from simulation.classes.controller import Move
 
@@ -21,10 +22,8 @@ def homogeneous_analysis():
         print(cycle_data.passengers.head())
 
         
-def convert_to_reward(simulation_data):
+def convert_to_reward(simulation_data, num_floors):
     """simulation_data is an array of dataframes"""
-
-    num_floors = 4
     
     cycles = []
     rewards = {}
@@ -32,25 +31,19 @@ def convert_to_reward(simulation_data):
     wait_time = []
     num_passenger = []
 
-    wait_L1 = []
-    wait_L2 = []
-    wait_L3 = []
-    wait_L4 = []
 
-    num_L1 = []
-    num_L2 = []
-    num_L3 = []
-    num_L4 = []
-    # lvl_wait = [0, 0, 0, 0]
+    wait_times = defaultdict(list)
+    num_passengers = defaultdict(list)
+
 
     idle_time_1 = []
     idle_time_2 = []
 
 
     for idx, cycle_data in enumerate(simulation_data):
-        cycles.append(cycle_data.cycle_duration)
+        cycles.append(cycle_data.cycle_duration) # cycle duration
         
-        # wait_time.append(cycle_data.passengers.groupby(['source']).sum())
+        # wait times per cycle
         wait_by_floor = cycle_data.passengers.groupby(['source']).sum()
         zeroes1 = pd.DataFrame(0, index = range(1,num_floors+1),columns = wait_by_floor.columns ).astype(float)
         zeroes1.loc[wait_by_floor.index, wait_by_floor.columns] = wait_by_floor
@@ -58,8 +51,7 @@ def convert_to_reward(simulation_data):
         wait_time.append(wait_w_zeroes['wait_time'])
 
         
-
-        # num_passenger.append(len(cycle_data.passengers))
+        # number of passengers per cycle
         num_passenger_per_floor = cycle_data.passengers.groupby(['source']).count()
         zeroes2 = pd.DataFrame(0, index = range(1,num_floors+1),columns = num_passenger_per_floor.columns ).astype(float)
         zeroes2.loc[num_passenger_per_floor.index, num_passenger_per_floor.columns] = num_passenger_per_floor
@@ -78,51 +70,23 @@ def convert_to_reward(simulation_data):
         idle_2 = end_idle_2 - start_idle_2
         idle_time_2.append(idle_2.sum())
 
-
-    for df in wait_time:
-        dict = df.to_dict()
-        for n in dict:
-            if n == 1:
-                wait_L1.append(dict[1])
-            if n == 2:
-                wait_L2.append(dict[2])
-            if n == 3: 
-                wait_L3.append(dict[3])
-            if n == 4:
-                wait_L4.append(dict[4])
+    # add cycle values into a consolidated dictionary for each floor
+    for cycle in num_passenger:
+        for floor in cycle.index:
+            num_passengers[floor].append(cycle.loc[floor])
+    
+    for cycle in wait_time:
+        for floor in cycle.index:
+            wait_times[floor].append(cycle.loc[floor])
 
     
-    for df in num_passenger:
-        dict = df.to_dict()
-        for n in dict:
-            if n == 1:
-                num_L1.append(dict[1])
-                # num_L1.append(np.zeroes(len(cycles) - len(dict[1])))
-            if n == 2:
-                num_L2.append(dict[2])
-                # num_L2.append(np.zeroes(len(cycles) - len(dict[2])))
-            if n == 3: 
-                num_L3.append(dict[3])
-                # num_L3.append(np.zeroes(len(cycles) - len(dict[1])))
-            if n == 4:
-                num_L4.append(dict[4])
 
-
-    
-    # for df in wait:
-    #     dict = df.to_dict()
-    #     for n, k in enumerate(dict['wait_time']):
-    #         if k == n+1: # if same level
-    #             lvl_wait[k-1] += dict['wait_time'][k] # add to level total wait time
-
-    # rewards['wait_time'] = wait_time
-    rewards['wait_time'] = [wait_L1, wait_L2, wait_L3, wait_L4]
-    # rewards['num_passenger'] = num_passenger 
-    rewards['num_passenger'] = [num_L1, num_L2, num_L3, num_L4]
+    rewards['wait_time'] = wait_times
+    rewards['num_passenger'] = num_passengers
     rewards['idle_time_1'] = idle_time_1
     rewards['idle_time_2'] = idle_time_2
 
-    # print(rewards['wait_time'][0])
+    # print(rewards)
 
     return cycles, rewards
 
