@@ -93,7 +93,7 @@ class Simulation:
 
             for i in self.elevators.keys():
                 if previous_elevator_state[i] != new_elevator_state[i]:
-                    self.cycle_data.update_elevator_state(event_time, i, new_elevator_state)
+                    self.cycle_data.update_elevator_state(event_time, i, new_elevator_state[i])
 
             removed_passengers = event.data_update()
             if removed_passengers:
