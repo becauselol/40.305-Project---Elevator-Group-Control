@@ -59,7 +59,7 @@ class GroupController:
         """
         # Everything is assigned to the first one, should be correct
         self.alternate = not self.alternate
-        return 1 if self.alternate else 2
+        return 1
         # return 1
 
     def add_ext_call_to_lift(self, lift_id, floor_call, direction, time):
