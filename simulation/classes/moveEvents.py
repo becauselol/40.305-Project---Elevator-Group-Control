@@ -66,7 +66,7 @@ class NextFloorEvent(ElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Elevator floor {self.elevator.floor} -> {self.floor}"
+        return f"Elevator {self.elevator_id} floor {self.elevator.floor} -> {self.floor}"
 
     def update(self):
         self.elevator.floor = self.floor
@@ -88,7 +88,7 @@ class DoorOpenEvent(ElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Elevator opening door at {self.floor}"
+        return f"Elevator {self.elevator_id} opening door at {self.floor}"
 
     def update(self):
         # consume the internal and external call
@@ -110,7 +110,7 @@ class DoorCloseEvent(ElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Elevator closing door at {self.floor}"
+        return f"Elevator {self.elevator_id} closing door at {self.floor}"
 
     def update(self):
         # update the elevators movement
@@ -147,7 +147,7 @@ class MoveIdleEvent(ElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Moving to IDLE floor {self.controller.get_idle_floor(self.elevator)}"
+        return f"Elevator {self.elevator_id} moving to IDLE floor {self.controller.get_idle_floor(self.elevator)}"
 
     def update(self):
         # now that it is triggered, it should trigger a movement that allows the waiting elevator to move to the idle state
@@ -167,7 +167,7 @@ class ReachIdleEvent(ElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Reached the IDLE state at {self.floor}"
+        return f"Elevator {self.elevator_id} reached the IDLE state at {self.floor}"
 
     def update(self):
         self.elevator.direction = Move.IDLE
@@ -188,7 +188,7 @@ class UpdateMoveEvent(ElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Elevator was in IDLE/WAIT, updating move"
+        return f"Elevator {self.elevator_id} was in IDLE/WAIT, updating move"
 
     def update(self):
         if self.elevator.direction == Move.MOVE_TO_IDLE:

@@ -54,7 +54,7 @@ class AlightEvent(PassengerElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Alighting {len(self.elevator.get_alighting(self.floor))} at {self.floor}"
+        return f"Alighting {len(self.elevator.get_alighting(self.floor))} from Lift {self.elevator_id} at {self.floor}"
 
 # will delete the internal calls
     def update(self):
@@ -87,13 +87,15 @@ class BoardEvent(PassengerElevatorEvent):
         super().__init__(time, floor, building, elevator_id)
 
     def describe(self):
-        return f"Boarding {len(self.building.get_boarding(self.floor, self.elevator.direction))} at {self.floor}"
+        return f"Boarding {len(self.building.get_boarding(self.floor, self.elevator.direction))} to Lift {self.elevator_id} at {self.floor}"
 
     def update(self):
 
         # board people
         internal_calls = self.building.add_passenger_to_elevator(self.elevator_id, self.floor, self.elevator.direction, self.time)
 
+
+        self.controller.consume_ext_call(self.floor, self.elevator.direction)
         # CODE SHOULD BE IRRELEVANT SINCE ASSUMPTION IS ELEVATOR IS INFINITELY LARGE
         # if there are any more ppl waiting, we add ext call again
         if (boarding_passengers := self.building.get_boarding(self.floor, self.elevator.direction)):
