@@ -62,6 +62,7 @@ Difference between `end_time` and `start_time`
 
 |Column|Description|
 |---|---|
+|`elevator_id`|The Id corresponding to the elevator|
 |`start_time`|Start time of the state|
 |`state`|The state the elevator was in from `start_time` to `end_time`|
 |`end_time`|End time of the state|

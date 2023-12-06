@@ -19,6 +19,8 @@ class GroupController:
             # defaults to all being level 1
             self.idle_floors = [1] * num_elevators
 
+        self.alternate = True
+
     def add_ext_call(self, floor_call, direction, time):
         if direction == Move.UP:
             if self.ext_call[floor_call - 1].up_call:
@@ -39,7 +41,7 @@ class GroupController:
             self.ext_call[floor - 1].down_call_time = float("inf")
 
     def request_is_empty(self):
-        return self.liftController[0].request_is_empty()
+        return self.liftController[1].request_is_empty()
 
     def assign_call(self, floor_call, direction, time):
         """
@@ -56,7 +58,9 @@ class GroupController:
         - The calls registered for each elevator
         """
         # Everything is assigned to the first one, should be correct
-        return 1
+        self.alternate = not self.alternate
+        return 1 if self.alternate else 2
+        # return 1
 
     def add_ext_call_to_lift(self, lift_id, floor_call, direction, time):
         self.liftControllers[lift_id].add_ext_call(floor_call, direction, time)

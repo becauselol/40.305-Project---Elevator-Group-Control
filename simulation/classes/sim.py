@@ -16,7 +16,7 @@ class Simulation:
         self.event_queue = []
 
     def initialize_building(self):
-        self.building = Building(self.num_floors)
+        self.building = Building(self.num_floors, 2)
         self.elevators = self.building.elevators
         self.controller = self.building.groupController
 
@@ -82,7 +82,8 @@ class Simulation:
             # NEED TO REMOVE MoveIdleEvent, if the new Event is a UpdateEvent
                 if isinstance(new_event, moveE.UpdateMoveEvent):
                     # remove any existing MoveIdleEvent 
-                    new_queue = [(t, e) for t, e in self.event_queue if not isinstance(e, moveE.MoveIdleEvent)]
+                    # remove the corresponding MoveIdleEvent
+                    new_queue = [(t, e) for t, e in self.event_queue if not (isinstance(e, moveE.MoveIdleEvent) and e.elevator_id == new_event.elevator_id)]
                     self.event_queue = new_queue
 
                 heappush(self.event_queue, (new_event.time, new_event))

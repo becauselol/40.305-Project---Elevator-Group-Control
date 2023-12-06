@@ -133,6 +133,7 @@ class LiftController(Controller):
                 return min(farthest_up)
 
         print(move_direction)
+        print(self.id)
         print("int call:", self.int_call)
         print("ext up call:", [e_call.up_call for e_call in self.ext_call])
         print("ext down call:", [e_call.down_call for e_call in self.ext_call])
