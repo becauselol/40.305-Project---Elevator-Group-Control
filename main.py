@@ -24,10 +24,12 @@ if __name__ == "__main__":
     
     simulation_data = []
 
+
     for idx, cycle_data in enumerate(sim.simulate(simulation_duration)):
         # print("cycle:", idx)
         # print("cycle duration:", cycle_data.cycle_duration)
         simulation_data.append(cycle_data)
+        
 
     end_time = time.time()
     print(f"ENDING SIMULATION\n")
@@ -35,13 +37,17 @@ if __name__ == "__main__":
 
     print(simulation_data[0].elevator_state.head())
 
-
     print("Total Number of Cycles:", len(simulation_data))
 
     cycle_len_arr, reward_dict = convert_to_reward(simulation_data)
 
     for reward, values in reward_dict.items():
-        result = calculate_expected_reward(cycle_len_arr, values)
+        if reward == "wait_time":
+            result = calculate_expected_reward(reward_dict["num_passenger"], values)
+        else:
+            result = calculate_expected_reward(cycle_len_arr, values)     
+
 
         print_res(result, reward)
 
+ 

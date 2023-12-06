@@ -25,25 +25,37 @@ def convert_to_reward(simulation_data):
     
     cycles = []
     rewards = {}
+
     wait_time = []
     num_passenger = []
-    idle_time = []
+    idle_time_1 = []
+    idle_time_2 = []
 
-    
+
     for idx, cycle_data in enumerate(simulation_data):
         cycles.append(cycle_data.cycle_duration)
         wait_time.append(cycle_data.passengers['wait_time'].sum())
         num_passenger.append(len(cycle_data.passengers))
 
-        # finding idle time of each cycle
-        end_idle = cycle_data.elevator_state['end_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
-        start_idle = cycle_data.elevator_state['start_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
-        idle = end_idle - start_idle
-        idle_time.append(idle.sum())
+        # finding idle time of each cycle for elevator 1
+        end_idle_1 = cycle_data.elevator_state['end_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 1)]
+        start_idle_1 = cycle_data.elevator_state['start_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 1)]
+        idle_1 = end_idle_1 - start_idle_1
+        idle_time_1.append(idle_1.sum())
+
+        # finding idle time of each cycle for elevator 2
+        end_idle_2 = cycle_data.elevator_state['end_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 2)]
+        start_idle_2 = cycle_data.elevator_state['start_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 2)]
+        idle_2 = end_idle_2 - start_idle_2
+        idle_time_2.append(idle_2.sum())
+
+
+
 
     rewards['wait_time'] = wait_time
     rewards['num_passenger'] = num_passenger 
-    rewards['idle_time'] = idle_time
+    rewards['idle_time_1'] = idle_time_1
+    rewards['idle_time_2'] = idle_time_2
 
     
     return cycles, rewards
