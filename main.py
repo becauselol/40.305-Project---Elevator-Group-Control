@@ -12,12 +12,14 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
     num_floors = 4
+    num_elevators = 2
     simulation_duration = 72000
-    sim = Simulation(num_floors)
+    sim = Simulation(num_floors, num_elevators)
 
     print("random seed:", seed)
     print("simulation duration:", simulation_duration)
     print("number of floors:", num_floors)
+    print("number of elevators:", num_elevators)
 
     start_time = time.time()
     print(f"\nSTARTING SIMULATION\n")

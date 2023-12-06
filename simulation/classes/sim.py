@@ -11,12 +11,12 @@ from .DataStore import DataStore
 
 
 class Simulation:
-    def __init__(self, num_floors):
+    def __init__(self, num_floors, num_elevators):
         self.num_floors = num_floors
+        self.num_elevators = num_elevators
         self.event_queue = []
 
     def initialize_building(self):
-        self.num_elevators = 2
         self.building = Building(self.num_floors, self.num_elevators)
         self.elevators = self.building.elevators
         self.controller = self.building.groupController
@@ -72,6 +72,17 @@ class Simulation:
 
             # if self.elevators[1].direction == Move.IDLE:
             # print(event)
+#            print(self.elevators[2].get_num_passengers())
+#            for t, e in self.event_queue:
+#                one_events = [e for t, e in self.event_queue if (hasattr(e, "elevator_id") and e.elevator_id == 1)]
+#                num_one_events = len(one_events)
+#                if num_one_events > 1:
+#                    print("one", one_events)
+#
+#                two_events = [t for t, e in self.event_queue if (hasattr(e, "elevator_id") and e.elevator_id == 2)]
+#                num_two_events = len(two_events)
+#                if num_two_events > 1:
+#                    print("two", two_events)
             # print(self.elevators[1].get_num_passengers())
             # print(self.elevators[1].direction)
 
@@ -86,6 +97,7 @@ class Simulation:
                     # remove the corresponding MoveIdleEvent
                     new_queue = [(t, e) for t, e in self.event_queue if not (isinstance(e, moveE.MoveIdleEvent) and e.elevator_id == new_event.elevator_id)]
                     self.event_queue = new_queue
+                    heapify(self.event_queue)
 
                 heappush(self.event_queue, (new_event.time, new_event))
 
@@ -99,7 +111,7 @@ class Simulation:
             if removed_passengers:
                 self.cycle_data.update_passengers(removed_passengers)
 
-            if isinstance(event, moveE.ReachIdleEvent):
+            if isinstance(event, moveE.ReachIdleEvent) and all([Move.IDLE == state for state in [elevator.direction for elevator in self.elevators.values()]]):
                 count += 1
                 # yield the cycle data
                 self.cycle_data.finalize(event_time)
