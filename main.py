@@ -43,11 +43,21 @@ if __name__ == "__main__":
 
     for reward, values in reward_dict.items():
         if reward == "wait_time":
-            result = calculate_expected_reward(reward_dict["num_passenger"], values)
+
+            for i in range (4):
+                
+                result = calculate_expected_reward(reward_dict["num_passenger"][i], values[i])
+                print_res(result, reward + str(i))
+        
+        elif reward == "num_passenger":
+            for i in range (4):
+                print(len(values[i]) == len(cycle_len_arr))
+                result = calculate_expected_reward(cycle_len_arr, values[i])
+                print_res(result, reward + str(i))
+
         else:
             result = calculate_expected_reward(cycle_len_arr, values)     
-
-
-        print_res(result, reward)
+        
+            print_res(result, reward)
 
  
