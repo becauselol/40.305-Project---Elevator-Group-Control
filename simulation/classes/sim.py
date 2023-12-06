@@ -16,7 +16,7 @@ class Simulation:
         self.event_queue = []
 
     def initialize_building(self):
-        self.building = Building(self.num_floors)
+        self.building = Building(self.num_floors, 2)
         self.elevators = self.building.elevators
         self.controller = self.building.groupController
 
