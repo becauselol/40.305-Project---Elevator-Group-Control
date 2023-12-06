@@ -25,7 +25,10 @@ class DataStore:
         for i in self.elevator_state_dicts:
             self.elevator_state_dicts[i][-1]["end_time"] = end_time
 
-        self.elevator_state = pd.DataFrame(list(itertools.chain(self.elevator_state_dicts.values())))
+        self._massive_arr = []
+        for i in self.elevator_state_dicts.values():
+            self._massive_arr += i
+        self.elevator_state = pd.DataFrame(self._massive_arr)
 
         self.end_time = end_time
         self.cycle_duration = self.end_time - self.start_time

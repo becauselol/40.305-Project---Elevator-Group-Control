@@ -33,6 +33,8 @@ if __name__ == "__main__":
     print(f"ENDING SIMULATION\n")
     print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
 
+    print(simulation_data[0].elevator_state.head())
+
 
     print("Total Number of Cycles:", len(simulation_data))
 
