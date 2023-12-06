@@ -28,13 +28,14 @@ class DataStore:
     def passenger_dicts_to_df(self):
         self.passengers = pd.DataFrame(self.passenger_dicts)
 
-    def update_elevator_state(self, time, state):
+    def update_elevator_state(self, time, elevator_id, state):
         new_state_data = {
+                "elevator_id": elevator_id
                 "start_time": time,
                 "state": state
             }
         if self.elevator_state_dicts:
-            self.elevator_state_dicts[-1]["end_time"] = time
+            self.elevator_state_dicts[elevator_id][-1]["end_time"] = time
 
         self.elevator_state_dicts.append(new_state_data)
 

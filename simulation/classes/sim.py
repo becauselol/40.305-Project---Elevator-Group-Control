@@ -74,7 +74,7 @@ class Simulation:
             # print(self.elevators[1].get_num_passengers())
             # print(self.elevators[1].direction)
 
-            previous_elevator_state = self.elevators[1].direction
+            previous_elevator_state = {i: self.elevators[i].direction for i in self.elevators.keys()}
 
             # RUN the updates and create any new events as required
             for new_event in event.update():
@@ -88,10 +88,12 @@ class Simulation:
 
                 heappush(self.event_queue, (new_event.time, new_event))
 
-            new_elevator_state = self.elevators[1].direction
+            new_elevator_state = {i: self.elevators[i].direction for i in self.elevators.keys()}
 
-            if previous_elevator_state != new_elevator_state:
-                self.cycle_data.update_elevator_state(event_time, new_elevator_state)
+            if previous_elevator_state != new_elevator_state
+            for i in self.elevators.keys():
+                if previous_elevator_state[i] != new_elevator_state[i]:
+                    self.cycle_data.update_elevator_state(event_time, i, new_elevator_state)
 
             removed_passengers = event.data_update()
             if removed_passengers:
