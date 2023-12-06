@@ -11,13 +11,15 @@ class GroupController:
         self.name = "Group Controller"
         self.state = State.IDLE
         self.num_floors = num_floors
+        self.num_elevators = num_elevators
         self.ext_call = [ExtCall(i) for i in range(1, num_floors + 1)]
-        self.liftControllers = {i: LiftController(i, self.num_floors) for i in range(1, num_elevators + 1)}
         if idle_floors:
             self.idle_floors = idle_floors
         else:
             # defaults to all being level 1
             self.idle_floors = [1] * num_elevators
+
+        self.liftControllers = {i: LiftController(i, self.num_floors, self.idle_floors[i - 1]) for i in range(1, num_elevators + 1)}
 
         self.alternate = True
 
@@ -58,8 +60,8 @@ class GroupController:
         - The calls registered for each elevator
         """
         # Everything is assigned to the first one, should be correct
-        self.alternate = not self.alternate
-        return 1 if self.alternate else 2
+        self.alternate = (self.alternate + 1) % self.num_elevators
+        return self.alternate + 1
         # return 1
 
     def add_ext_call_to_lift(self, lift_id, floor_call, direction, time):

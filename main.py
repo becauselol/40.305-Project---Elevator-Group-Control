@@ -11,10 +11,11 @@ if __name__ == "__main__":
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
-    num_floors = 4
-    num_elevators = 2
+    num_floors = 6
+    num_elevators = 3
     simulation_duration = 72000
-    sim = Simulation(num_floors, num_elevators)
+    total_arrival_rate = 0.6
+    sim = Simulation(num_floors, num_elevators, total_arrival_rate)
 
     print("random seed:", seed)
     print("simulation duration:", simulation_duration)
@@ -35,10 +36,10 @@ if __name__ == "__main__":
     print(f"ENDING SIMULATION\n")
     print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
 
-    print(simulation_data[0].elevator_state.head())
 
 
     print("Total Number of Cycles:", len(simulation_data))
+    print(simulation_data[0].elevator_state.head())
 
     cycle_len_arr, reward_dict = convert_to_reward(simulation_data)
 

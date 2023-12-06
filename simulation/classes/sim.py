@@ -11,9 +11,10 @@ from .DataStore import DataStore
 
 
 class Simulation:
-    def __init__(self, num_floors, num_elevators):
+    def __init__(self, num_floors, num_elevators, total_arrival_rate):
         self.num_floors = num_floors
         self.num_elevators = num_elevators
+        self.total_arrival_rate = total_arrival_rate
         self.event_queue = []
 
     def initialize_building(self):
@@ -60,7 +61,8 @@ class Simulation:
         self.initialize_building()
         self.reset_cycle_data(0, self.elevators[1].direction)
 
-        uniform_rate = 20
+        uniform_rate = 1/ (self.total_arrival_rate / ((self.num_floors**2) - self.num_floors))
+        print("rate is", uniform_rate)
         rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
 
         self.initialize_arrivals(rate_matrix)
