@@ -16,11 +16,12 @@ class Simulation:
         self.event_queue = []
 
     def initialize_building(self):
-        self.building = Building(self.num_floors, 2)
+        self.num_elevators = 2
+        self.building = Building(self.num_floors, self.num_elevators)
         self.elevators = self.building.elevators
         self.controller = self.building.groupController
 
-        self.cycle_data = DataStore(self.num_floors, 0, self.elevators[1].direction)
+        self.cycle_data = DataStore(self.num_floors, 0, self.num_elevators, self.elevators[1].direction)
         
 
     def initialize_arrivals(self, rate_matrix):
@@ -48,7 +49,7 @@ class Simulation:
         heapify(self.event_queue)
         
     def reset_cycle_data(self, time, elevator_state):
-        self.cycle_data = DataStore(self.num_floors, time, elevator_state)
+        self.cycle_data = DataStore(self.num_floors, time, self.num_elevators, elevator_state)
 
     def reset_simulation(self):
         self.event_queue = []
@@ -74,7 +75,7 @@ class Simulation:
             # print(self.elevators[1].get_num_passengers())
             # print(self.elevators[1].direction)
 
-            previous_elevator_state = self.elevators[1].direction
+            previous_elevator_state = {i: self.elevators[i].direction for i in self.elevators.keys()}
 
             # RUN the updates and create any new events as required
             for new_event in event.update():
@@ -88,10 +89,11 @@ class Simulation:
 
                 heappush(self.event_queue, (new_event.time, new_event))
 
-            new_elevator_state = self.elevators[1].direction
+            new_elevator_state = {i: self.elevators[i].direction for i in self.elevators.keys()}
 
-            if previous_elevator_state != new_elevator_state:
-                self.cycle_data.update_elevator_state(event_time, new_elevator_state)
+            for i in self.elevators.keys():
+                if previous_elevator_state[i] != new_elevator_state[i]:
+                    self.cycle_data.update_elevator_state(event_time, i, new_elevator_state[i])
 
             removed_passengers = event.data_update()
             if removed_passengers:
