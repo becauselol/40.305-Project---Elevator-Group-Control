@@ -4,10 +4,10 @@ from .elevator import Elevator
 
 
 class Building:
-    def __init__(self, num_floors, num_elevators, group_controller_class):
+    def __init__(self, num_floors, num_elevators, group_controller_class, controller_args):
         self.num_elevators = num_elevators
         self.num_floors = num_floors
-        self.groupController = group_controller_class(num_floors, num_elevators)
+        self.groupController = group_controller_class(num_floors, num_elevators, **controller_args)
 
         self.elevators = {id: controller.elevator for id, controller in self.groupController.liftControllers.items()}
 

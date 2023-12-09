@@ -1,4 +1,5 @@
 import random
+from collections import defaultdict
 from enum import Enum
 from abc import ABC, abstractmethod
 from .controller import ExtCall, LiftController
@@ -57,10 +58,14 @@ class ZoningController(GroupController):
         Zones should be an dictionary containing the floors each elevator is assigned to
         floors assigned in the dictionary should be in the form of an iterable
         if multiple elevators are assigned to each floor, random choice is done for assignment
+
+        if Zones is not 
         """
         super().__init__(num_floors, num_elevators, idle_floors)
-        self.name = "Random Assignment"
+        self.name = "Zoning"
         # Check for each floors assigned elevator
+
+        assert zones != None, "Zones must be assigned"
         self.elevator_to_floor = zones
         self.floor_to_elevator = defaultdict(list)
 
@@ -69,5 +74,5 @@ class ZoningController(GroupController):
                 self.floor_to_elevator[floor].append(elevator_id)
     
     def assign_call(self, floor_call, direction, time):
-        return random.choice(self.floor_to_elevator[floor])
+        return random.choice(self.floor_to_elevator[floor_call])
 
