@@ -9,6 +9,16 @@ Based on Elevator Group Control Problem
 - Number of passengers each elevator service
 
 ## Algorithms Tested
+- Random Assignment (Control)
+- Zoning (Sectoring)
+- Nearest Elevator (Feasibility Score)
+- Lifts dedicated to moving up and down
+- Custom Feasibility Score (Based on IDLE, distance, movement)
+
+## Various Arrival distributions
+- Uniform
+- 1st Floor heavy
+- Multi-floor heavy
 
 ## Installation
 Requires Python >= 3.11
