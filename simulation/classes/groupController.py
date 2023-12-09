@@ -2,7 +2,7 @@ import random
 from collections import defaultdict
 from enum import Enum
 from abc import ABC, abstractmethod
-from .controller import ExtCall, LiftController
+from .controller import ExtCall, LiftController, Move
 from .elevator import Elevator
 
 class State(Enum):
@@ -85,10 +85,14 @@ class HeuristicController(GroupController):
         self.name = "Heuristic Controller"
 
     def assign_call(self, floor_call, direction, time):
-        return min(list(range(1, self.num_elevators + 1)), key=lambda elevator_id: self.heuristic(elevator_id))
+        heuristic_values = [(self.heuristic(elevator_id, floor_call, direction), elevator_id) for elevator_id in range(1, self.num_elevators + 1)]
+
+        min_val, _ = min(heuristic_values)
+        min_choices = [e_id for h, e_id in heuristic_values if h == min_val]
+        return random.choice(min_choices)
 
     @abstractmethod
-    self.heuristic(self, elevator_id):
+    def heuristic(self, elevator_id, floor_call, direction):
         pass
 
 
@@ -97,7 +101,23 @@ class NearestElevatorController(HeuristicController):
         super().__init__(num_floors, num_elevators, idle_floors)
         self.name = "Nearest Elevator Controller"
 
-    self.heuristic(self, elevator_id):
+    def heuristic(self, elevator_id, floor_call, direction):
+        """
+
+        """
+        elevator = self.liftControllers[elevator_id].elevator
+        heuristic = abs(elevator.floor - floor_call)
+
+        if direction == elevator.direction:
+            if elevator.floor * direction.value >= floor_call * direction.value:
+                heuristic = 2 * self.num_floors - heuristic
+
+        else:
+            if elevator.direction in [Move.UP, Move.DOWN]:
+                if elevator.floor * direction.value >= floor_call * direction.value:
+                    heuristic = 2 * floor_call + heuristic
+                else:
+                    heuristic = 2 * elevator.floor + heuristic
 
         return heuristic
 
