@@ -57,10 +57,10 @@ class Controller(ABC):
         pass
 
 class LiftController(Controller):
-    def __init__(self, id, num_floors):
+    def __init__(self, id, num_floors, idle_floor=1):
         self.id = id
         self.name = "Lift Controller"
-        self.idle_floor = 1
+        self.idle_floor = idle_floor
         self.num_floors = num_floors
         self.elevator = elevator.Elevator(self.id, self.num_floors)
 
@@ -133,7 +133,8 @@ class LiftController(Controller):
                 return min(farthest_up)
 
         print(move_direction)
-        print(self.id)
+        print("elevator floor:", floor)
+        print("elevator_id:", self.id)
         print("int call:", self.int_call)
         print("ext up call:", [e_call.up_call for e_call in self.ext_call])
         print("ext down call:", [e_call.down_call for e_call in self.ext_call])

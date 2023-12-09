@@ -1,4 +1,3 @@
-# HELPs recognize this as the main folder in the package
 import time
 import numpy as np
 import random
@@ -11,32 +10,30 @@ if __name__ == "__main__":
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
-    num_floors = 4
-    num_elevators = 2
+    num_floors = 6
+    num_elevators = 3
     simulation_duration = 72000
-    sim = Simulation(num_floors)
+    total_arrival_rate = 0.6
+    sim = Simulation(num_floors, num_elevators, total_arrival_rate)
 
     print("random seed:", seed)
     print("simulation duration:", simulation_duration)
     print("number of floors:", num_floors)
+    print("number of elevators:", num_elevators)
 
     start_time = time.time()
     print(f"\nSTARTING SIMULATION\n")
     
     simulation_data = []
 
-
     for idx, cycle_data in enumerate(sim.simulate(simulation_duration)):
         # print("cycle:", idx)
         # print("cycle duration:", cycle_data.cycle_duration)
         simulation_data.append(cycle_data)
-        
 
     end_time = time.time()
     print(f"ENDING SIMULATION\n")
     print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
-
-
     print("Total Number of Cycles:", len(simulation_data))
 
     cycle_len_arr, reward_dict = convert_to_reward(simulation_data, num_floors, num_elevators)
