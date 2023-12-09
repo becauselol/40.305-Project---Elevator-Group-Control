@@ -2,6 +2,7 @@ import time
 import numpy as np
 import random
 from simulation.classes.sim import Simulation
+import simulation.classes.groupController as gControl
 
 from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward
 
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     num_elevators = 3
     simulation_duration = 72000
     total_arrival_rate = 0.6
-    sim = Simulation(num_floors, num_elevators, total_arrival_rate)
+    sim = Simulation(num_floors, num_elevators, total_arrival_rate, gControl.RandomController)
 
     print("random seed:", seed)
     print("simulation duration:", simulation_duration)
