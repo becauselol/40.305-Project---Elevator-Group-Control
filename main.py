@@ -2,24 +2,36 @@ import time
 import numpy as np
 import random
 from simulation.classes.sim import Simulation
+import simulation.classes.groupController as gControl
 
 from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward
 
 if __name__ == "__main__":
     print("INITIALIZING SIMULATION\n")
+
+    # Seed for randomness
     seed = 1
     random.seed(seed)
     np.random.seed(seed)
+
+    # Building Parameters
     num_floors = 6
     num_elevators = 3
-    simulation_duration = 72000
     total_arrival_rate = 0.6
-    sim = Simulation(num_floors, num_elevators, total_arrival_rate)
+    controller_type = gControl.RandomController
+
+
+    # Simulation Parameters
+    simulation_duration = 72000
+
+    # Initialize Simulation Class
+    sim = Simulation(num_floors, num_elevators, total_arrival_rate, controller_type)
 
     print("random seed:", seed)
     print("simulation duration:", simulation_duration)
     print("number of floors:", num_floors)
     print("number of elevators:", num_elevators)
+    print("Group Control Type:", str(controller_type))
 
     start_time = time.time()
     print(f"\nSTARTING SIMULATION\n")

@@ -11,14 +11,15 @@ from .DataStore import DataStore
 
 
 class Simulation:
-    def __init__(self, num_floors, num_elevators, total_arrival_rate):
+    def __init__(self, num_floors, num_elevators, total_arrival_rate, group_controller):
         self.num_floors = num_floors
         self.num_elevators = num_elevators
         self.total_arrival_rate = total_arrival_rate
         self.event_queue = []
+        self.group_controller = group_controller
 
     def initialize_building(self):
-        self.building = Building(self.num_floors, self.num_elevators)
+        self.building = Building(self.num_floors, self.num_elevators, self.group_controller)
         self.elevators = self.building.elevators
         self.controller = self.building.groupController
 
