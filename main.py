@@ -18,14 +18,23 @@ if __name__ == "__main__":
     num_floors = 6
     num_elevators = 3
     total_arrival_rate = 0.6
-    controller_type = gControl.RandomController
+    controller_type = gControl.ZoningController
 
+    zoning = {
+            1: [1, 2, 3],
+            2: [1, 4, 5],
+            3: [1, 6]
+            }
+
+    controller_args = {
+            "zones": zoning
+            }
 
     # Simulation Parameters
     simulation_duration = 72000
 
     # Initialize Simulation Class
-    sim = Simulation(num_floors, num_elevators, total_arrival_rate, controller_type)
+    sim = Simulation(num_floors, num_elevators, total_arrival_rate, controller_type, controller_args)
 
     print("random seed:", seed)
     print("simulation duration:", simulation_duration)
