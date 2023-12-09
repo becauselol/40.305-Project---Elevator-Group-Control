@@ -44,5 +44,9 @@ class GroupController(ABC):
         self.liftControllers[lift_id].add_ext_call(floor_call, direction, time)
 
 class RandomController(GroupController):
+    def __init__(self, num_floors, num_elevators, idle_floors=None):
+        super().__init__(num_floors, num_elevators, idle_floors)
+        self.name = "Random Assignment"
+    
     def assign_call(self, floor_call, direction, time):
         return random.randint(1, self.num_elevators)
