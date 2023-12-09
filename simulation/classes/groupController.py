@@ -44,6 +44,7 @@ class GroupController(ABC):
     def add_ext_call_to_lift(self, lift_id, floor_call, direction, time):
         self.liftControllers[lift_id].add_ext_call(floor_call, direction, time)
 
+
 class RandomController(GroupController):
     def __init__(self, num_floors, num_elevators, idle_floors=None):
         super().__init__(num_floors, num_elevators, idle_floors)
@@ -51,6 +52,7 @@ class RandomController(GroupController):
     
     def assign_call(self, floor_call, direction, time):
         return random.randint(1, self.num_elevators)
+
 
 class ZoningController(GroupController):
     def __init__(self, num_floors, num_elevators, idle_floors=None, zones=None):
@@ -76,3 +78,28 @@ class ZoningController(GroupController):
     def assign_call(self, floor_call, direction, time):
         return random.choice(self.floor_to_elevator[floor_call])
 
+
+class HeuristicController(GroupController):
+    def __init__(self, num_floors, num_elevators, idle_floors=None):
+        super().__init__(num_floors, num_elevators, idle_floors)
+        self.name = "Heuristic Controller"
+
+    def assign_call(self, floor_call, direction, time):
+        return min(list(range(1, self.num_elevators + 1)), key=lambda elevator_id: self.heuristic(elevator_id))
+
+    @abstractmethod
+    self.heuristic(self, elevator_id):
+        pass
+
+
+class NearestElevatorController(HeuristicController):
+    def __init__(self, num_floors, num_elevators, idle_floors=None):
+        super().__init__(num_floors, num_elevators, idle_floors)
+        self.name = "Nearest Elevator Controller"
+
+    self.heuristic(self, elevator_id):
+
+        return heuristic
+
+
+    

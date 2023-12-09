@@ -18,7 +18,7 @@ if __name__ == "__main__":
     num_floors = 6
     num_elevators = 3
     total_arrival_rate = 0.6
-    controller_type = gControl.ZoningController
+    controller_type = gControl.RandomController
 
     zoning = {
             1: [1, 2, 3],
@@ -27,7 +27,7 @@ if __name__ == "__main__":
             }
 
     controller_args = {
-            "zones": zoning
+            # "zones": zoning
             }
 
     # Simulation Parameters
