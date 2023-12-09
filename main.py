@@ -12,6 +12,7 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
     num_floors = 4
+    num_elevators = 2
     simulation_duration = 72000
     sim = Simulation(num_floors)
 
@@ -35,29 +36,20 @@ if __name__ == "__main__":
     print(f"ENDING SIMULATION\n")
     print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
 
-    print(simulation_data[0].elevator_state.head())
 
     print("Total Number of Cycles:", len(simulation_data))
 
-    cycle_len_arr, reward_dict = convert_to_reward(simulation_data)
+    cycle_len_arr, reward_dict = convert_to_reward(simulation_data, num_floors, num_elevators)
 
-    for reward, values in reward_dict.items():
-        if reward == "wait_time":
+    for floor, rewards in reward_dict["wait_time"].items():
+        num_passengers = reward_dict["num_passenger"][floor]
+        result = calculate_expected_reward(num_passengers, rewards)
+        print_res(result, f"wait time for floor {floor}")
 
-            for i in range (4):
-                
-                result = calculate_expected_reward(reward_dict["num_passenger"][i], values[i])
-                print_res(result, reward + str(i))
-        
-        elif reward == "num_passenger":
-            for i in range (4):
-                print(len(values[i]) == len(cycle_len_arr))
-                result = calculate_expected_reward(cycle_len_arr, values[i])
-                print_res(result, reward + str(i))
+    for floor, rewards in reward_dict["num_passenger"].items():
+        result = calculate_expected_reward(cycle_len_arr, rewards)
+        print_res(result, f"arrival rate for floor {floor}")
 
-        else:
-            result = calculate_expected_reward(cycle_len_arr, values)     
-        
-            print_res(result, reward)
-
- 
+    for elevator_id, rewards in reward_dict["idle_time"].items():
+        result = calculate_expected_reward(cycle_len_arr, rewards)
+        print_res(result, f"idle time for elevator {elevator_id}")

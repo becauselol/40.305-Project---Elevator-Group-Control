@@ -22,7 +22,7 @@ def homogeneous_analysis():
         print(cycle_data.passengers.head())
 
         
-def convert_to_reward(simulation_data, num_floors):
+def convert_to_reward(simulation_data, num_floors, num_elevators):
     """simulation_data is an array of dataframes"""
     
     cycles = []
@@ -36,6 +36,7 @@ def convert_to_reward(simulation_data, num_floors):
     num_passengers = defaultdict(list)
 
 
+    idle_times = defaultdict(list)
     idle_time_1 = []
     idle_time_2 = []
 
@@ -45,7 +46,7 @@ def convert_to_reward(simulation_data, num_floors):
         
         # wait times per cycle
         wait_by_floor = cycle_data.passengers.groupby(['source']).sum()
-        zeroes1 = pd.DataFrame(0, index = range(1,num_floors+1),columns = wait_by_floor.columns ).astype(float)
+        zeroes1 = pd.DataFrame(0, index = range(1,num_floors+1), columns = wait_by_floor.columns).astype(float)
         zeroes1.loc[wait_by_floor.index, wait_by_floor.columns] = wait_by_floor
         wait_w_zeroes = zeroes1
         wait_time.append(wait_w_zeroes['wait_time'])
@@ -53,22 +54,19 @@ def convert_to_reward(simulation_data, num_floors):
         
         # number of passengers per cycle
         num_passenger_per_floor = cycle_data.passengers.groupby(['source']).count()
-        zeroes2 = pd.DataFrame(0, index = range(1,num_floors+1),columns = num_passenger_per_floor.columns ).astype(float)
+        zeroes2 = pd.DataFrame(0, index = range(1,num_floors+1), columns = num_passenger_per_floor.columns).astype(float)
         zeroes2.loc[num_passenger_per_floor.index, num_passenger_per_floor.columns] = num_passenger_per_floor
         num_w_zeroes = zeroes2
         num_passenger.append(num_w_zeroes['wait_time'])
 
         # finding idle time of each cycle for elevator 1
-        end_idle_1 = cycle_data.elevator_state['end_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 1)]
-        start_idle_1 = cycle_data.elevator_state['start_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 1)]
-        idle_1 = end_idle_1 - start_idle_1
-        idle_time_1.append(idle_1.sum())
+        for elevator_id in range(1, num_elevators + 1):
 
-        # finding idle time of each cycle for elevator 2
-        end_idle_2 = cycle_data.elevator_state['end_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 2)]
-        start_idle_2 = cycle_data.elevator_state['start_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == 2)]
-        idle_2 = end_idle_2 - start_idle_2
-        idle_time_2.append(idle_2.sum())
+            end_idle = cycle_data.elevator_state['end_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == elevator_id)]
+            start_idle = cycle_data.elevator_state['start_time'].loc[(cycle_data.elevator_state['state'] == Move.IDLE) & (cycle_data.elevator_state['elevator_id'] == elevator_id)]
+            idle = end_idle - start_idle
+            idle_times[elevator_id].append(idle.sum())
+
 
     # add cycle values into a consolidated dictionary for each floor
     for cycle in num_passenger:
@@ -83,8 +81,7 @@ def convert_to_reward(simulation_data, num_floors):
 
     rewards['wait_time'] = wait_times
     rewards['num_passenger'] = num_passengers
-    rewards['idle_time_1'] = idle_time_1
-    rewards['idle_time_2'] = idle_time_2
+    rewards["idle_time"] = idle_times
 
     # print(rewards)
 
