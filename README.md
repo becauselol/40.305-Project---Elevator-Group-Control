@@ -3,6 +3,13 @@
 Project for 40.305 Adv Topics in Stochastic Modelling
 Based on Elevator Group Control Problem
 
+## Data Analysed
+- Wait Times of passengers by floor
+- Idle Times of each elevator
+- Number of passengers each elevator service
+
+## Algorithms Tested
+
 ## Installation
 Requires Python >= 3.11
 Create a new virtual environment and activate it:
