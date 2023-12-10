@@ -16,9 +16,6 @@ if __name__ == "__main__":
     random.seed(seed)
     np.random.seed(seed)
     
-    simulation_data = []
-    result_wait_t = []
-    result_idle_t = []
     params = {
             "num_floors": 6,
             "num_elevators": 3,
@@ -38,30 +35,10 @@ if __name__ == "__main__":
             3: [5, 6]
             }
 
-    result_random = run_experiemnt(params, RandomController)
-    result_zoning = run_experiemnt(params, ZoningController, zoning_params)
-    result_nearest = run_experiemnt(params, NearestElevatorController)
+    sim_result_random = run_experiemnt(params, RandomController)
+    sim_result_zoning = run_experiemnt(params, ZoningController, zoning_params)
+    sim_result_nearest = run_experiemnt(params, NearestElevatorController)
 
-    for floor, rewards in reward_dict["wait_time"].items():
-        num_passengers = reward_dict["num_passenger"][floor]
-        result = calculate_expected_reward(num_passengers, rewards)
-        result["floor"] = floor
-        result_wait_t.append(result)
-        print_res(result, f"wait time for floor {floor}")
-
-    wait_time_data = pd.DataFrame(result_wait_t)
-
-    for floor, rewards in reward_dict["num_passenger"].items():
-        result = calculate_expected_reward(cycle_len_arr, rewards)
-        print_res(result, f"arrival rate for floor {floor}")
-
-    for elevator_id, rewards in reward_dict["idle_time"].items():
-        result = calculate_expected_reward(cycle_len_arr, rewards)
-        result["elevator"] = elevator_id
-        result_idle_t.append(result)
-        print_res(result, f"idle time for elevator {elevator_id}")
-    idle_time_data = pd.DataFrame(result_idle_t)
-
-    print(idle_time_data)
-    
-    plt_graph(wait_time_data, "wait_time")
+    result_random = run_analysis(sim_result_random, "Random") 
+    result_zoning = run_analysis(sim_result_zoning, "Zoning")
+    result_nearest = run_analysis(sim_result_nearest, "Nearest")
