@@ -39,3 +39,7 @@ if __name__ == "__main__":
     result_random = run_analysis(params, sim_result_random, "Random") 
     result_zoning = run_analysis(params, sim_result_zoning, "Zoning")
     result_nearest = run_analysis(params, sim_result_nearest, "Nearest")
+
+    # We want comparison graph for the different policies
+    # We also want to compare the different idle floor settings
+    # We will then do a comparison
