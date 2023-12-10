@@ -64,7 +64,6 @@ class Simulation:
         self.reset_cycle_data(0, self.elevators[1].direction)
 
         uniform_rate = 1/ (self.total_arrival_rate / ((self.num_floors**2) - self.num_floors))
-        print("rate is", uniform_rate)
         rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
 
         self.initialize_arrivals(rate_matrix)

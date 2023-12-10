@@ -45,7 +45,8 @@ if __name__ == "__main__":
     
     all_idle_combinations = get_all_idle_combinations(params["num_floors"], params["num_elevators"])
 
-    print(len(all_idle_combinations))
+    print("idle combination:", len(all_idle_combinations))
+
     collated_result = []
 
     for idle_floor_combination in tqdm(all_idle_combinations):

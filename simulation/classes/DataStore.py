@@ -3,8 +3,25 @@ import itertools
 
 class DataStore:
     def __init__(self, num_floors, start_time, num_elevators, state):
+        self.passenger_columns = [
+                "spawn_time",
+                "source",
+                "dest",
+                "board_time",
+                "exit_time",
+                "wait_time",
+                "sys_time",
+                "lift_time"
+                ]
         self.passenger_dicts = []
         self.num_elevators = num_elevators
+
+        self.elevator_state_columns = [
+                "elevator_id",
+                "start_time",
+                "end_time",
+                "state"
+                ]
         self.elevator_state_dicts = {i: [
                 {
                     "elevator_id": i,
@@ -28,13 +45,13 @@ class DataStore:
         self._massive_arr = []
         for i in self.elevator_state_dicts.values():
             self._massive_arr += i
-        self.elevator_state = pd.DataFrame(self._massive_arr)
+        self.elevator_state = pd.DataFrame(self._massive_arr, columns=self.elevator_state_columns)
 
         self.end_time = end_time
         self.cycle_duration = self.end_time - self.start_time
 
     def passenger_dicts_to_df(self):
-        self.passengers = pd.DataFrame(self.passenger_dicts)
+        self.passengers = pd.DataFrame(self.passenger_dicts, columns=self.passenger_columns)
 
     def update_elevator_state(self, time, elevator_id, state):
         new_state_data = {
