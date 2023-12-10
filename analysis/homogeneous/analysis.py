@@ -40,15 +40,24 @@ def convert_to_reward(simulation_data, num_floors, num_elevators):
     wait_times = defaultdict(list)
     num_passengers = defaultdict(list)
 
-
+    overall_wait_time = []
+    overall_num_passenger = []
+    overall_idle_time = []
+    
     idle_times = defaultdict(list)
-    idle_time_1 = []
-    idle_time_2 = []
-
 
     for idx, cycle_data in enumerate(simulation_data):
         cycles.append(cycle_data.cycle_duration) # cycle duration
+        overall_wait_time.append(cycle_data.passengers['wait_time'].sum())
+        overall_num_passenger.append(len(cycle_data.passengers))
+
+        # finding idle time of each cycle
+        end_idle = cycle_data.elevator_state['end_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
+        start_idle = cycle_data.elevator_state['start_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
+        idle = end_idle - start_idle
+        overall_idle_time.append(idle.sum())
         
+
         # wait times per cycle
         wait_by_floor = cycle_data.passengers.groupby(['source']).sum()
         zeroes1 = pd.DataFrame(0, index = range(1,num_floors+1), columns = wait_by_floor.columns).astype(float)
@@ -83,10 +92,16 @@ def convert_to_reward(simulation_data, num_floors, num_elevators):
             wait_times[floor].append(cycle.loc[floor])
 
     
+    overall = {
+            "wait_time": overall_wait_time,
+            "num_passenger": overall_num_passenger,
+            "idle_time": overall_idle_time
+            }
 
     rewards['wait_time'] = wait_times
     rewards['num_passenger'] = num_passengers
     rewards["idle_time"] = idle_times
+    rewards["overall"] = overall
 
     # print(rewards)
 
