@@ -1,7 +1,22 @@
+import time
+import numpy as np
+import random
+import pandas as pd
+from simulation.classes.sim import Simulation
+
+from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph
+
 def run_experiment(sim_params, controller, controller_params):
+    random.seed(sim_params["seed"])
+    np.random.seed(sim_params["seed"])
     result_wait_t = []
     result_idle_t = []
-    sim = Simulation(**sim_params, controller=controller, controller_params)
+    sim = Simulation(
+            sim_params["num_floors"],
+            sim_params["num_elevators"],
+            sim_params["total_arrival_rate"],
+            group_controller=controller, 
+            controller_args=controller_params)
 
     print(f"\nSTARTING SIMULATION\n")
     start_time = time.time()
@@ -16,9 +31,15 @@ def run_experiment(sim_params, controller, controller_params):
 
     return simulation_data
 
-def run_analysis(simulation_data, name):
+def run_analysis(sim_params, simulation_data, label):
+    num_floors = sim_params["num_floors"]
+    num_elevators = sim_params["num_elevators"]
+
     print("ANALYZING")
     cycle_len_arr, reward_dict = convert_to_reward(simulation_data, num_floors, num_elevators)
+
+    result_wait_t = []
+    result_idle_t = []
 
     for floor, rewards in reward_dict["wait_time"].items():
         num_passengers = reward_dict["num_passenger"][floor]
@@ -42,10 +63,11 @@ def run_analysis(simulation_data, name):
     idle_time_data = pd.DataFrame(result_idle_t)
 
     results = {
-            "name": name
-            "wait_time", wait_time_data,
+            "label": label,
+            "wait_time": wait_time_data,
             "idle_time": idle_time_data
             }
     return results
 
-def run_comparison(*args)
+def run_comparison(*args):
+    pass
