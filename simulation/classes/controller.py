@@ -194,7 +194,7 @@ class LiftController(Controller):
             if above_calls:
                 return Move.UP
 
-        return Move.WAIT
+        return Move.NONE
 
     def check_direction(self, elevator_floor):
         # based on the current floor

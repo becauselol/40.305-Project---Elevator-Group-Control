@@ -2,14 +2,12 @@ from enum import Enum
 from . import controller 
 
 class State(Enum):
-    MOVING = 1
+    MOVING = 1 # That means the lift is in Move.UP or Move.DOWN
+    # The remaining states are when lift is in Move.NONE
     IDLE = 0
     WAIT = 2
     WAIT_UPDATE = 3
     MOVING_TO_IDLE = float("inf")
-
-
-
 
 class Elevator:
     def __init__(self, id, num_floors, capacity=float("inf"), idle_floor=1):
