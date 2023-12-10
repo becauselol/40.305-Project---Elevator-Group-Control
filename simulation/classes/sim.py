@@ -8,6 +8,7 @@ from . import passengerEvents as passE
 from . import moveEvents as moveE
 from .controller import Move
 from .DataStore import DataStore
+from .elevator import State
 
 
 class Simulation:

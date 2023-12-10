@@ -138,13 +138,13 @@ class DoorCloseEvent(ElevatorEvent):
                         )
                 return        
         # if it is moving, we just go
-    else:
-        yield NextFloorEvent(
-                self.time + self.elevator.move_speed,
-                self.floor + self.elevator.direction.value,
-                self.building, self.elevator_id
-                )
-        return
+        else:
+            yield NextFloorEvent(
+                    self.time + self.elevator.move_speed,
+                    self.floor + self.elevator.direction.value,
+                    self.building, self.elevator_id
+                    )
+            return
 
 
 class MoveIdleEvent(ElevatorEvent):

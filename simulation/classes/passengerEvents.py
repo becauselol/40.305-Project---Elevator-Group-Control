@@ -4,6 +4,7 @@ from .event import PassengerEvent, PassengerElevatorEvent
 from .controller import Move
 from . import moveEvents as moveE
 from .passenger import Passenger
+from .elevator import State
 
 class ArrivalEvent(PassengerEvent):
 # need to add the external call
