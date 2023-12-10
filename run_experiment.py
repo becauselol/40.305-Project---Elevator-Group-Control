@@ -18,16 +18,13 @@ def run_experiment(sim_params, controller, controller_params):
             group_controller=controller, 
             controller_args=controller_params)
 
-    print(f"\nSTARTING SIMULATION\n")
+
     start_time = time.time()
 
     simulation_data = list(sim.simulate(sim_params["simulation_duration"]))
-    print("Simulation done for", sim.building.groupController)
 
     end_time = time.time()
-    print(f"ENDING SIMULATION\n")
-    print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
-    print("Total Number of Cycles:", len(simulation_data))
+
 
     return simulation_data
 
@@ -35,12 +32,28 @@ def run_analysis(sim_params, simulation_data, label):
     num_floors = sim_params["num_floors"]
     num_elevators = sim_params["num_elevators"]
 
-    print("ANALYZING")
     cycle_len_arr, reward_dict = convert_to_reward(simulation_data, num_floors, num_elevators)
 
     result_wait_t = []
     result_num_pass = []
     result_idle_t = []
+
+    overall_stat_calculation = dict(
+            avg_wait_time=("num_passenger", "wait_time"),
+            passenger_arrival_rate=("cycle_duration", "num_passenger"),
+            avg_idle_time=("cycle_duration", "idle_time")
+            )
+
+    overall_stat_arr = []
+    for stat_label, (cycle, reward) in overall_stat_calculation.items():
+        result = calculate_expected_reward(reward_dict["overall"][cycle], reward_dict["overall"][reward])
+        result["reward label"] = reward
+        result["cycle label"] = cycle
+        result["stat label"] = stat_label
+        overall_stat_arr.append(result)
+
+    overall_stat_data = pd.DataFrame(overall_stat_arr)
+
 
     for floor, rewards in reward_dict["wait_time"].items():
         num_passengers = reward_dict["num_passenger"][floor]
@@ -68,7 +81,9 @@ def run_analysis(sim_params, simulation_data, label):
             "label": label,
             "wait_time": wait_time_data,
             "idle_time": idle_time_data,
-            "passenger_arrival": passenger_arrival_data
+            "passenger_arrival": passenger_arrival_data,
+            "overall_stats": overall_stat_data,
+            "num_cycles": len(cycle_len_arr)
             }
     return results
 

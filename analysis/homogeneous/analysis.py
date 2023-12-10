@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 import random
 import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+import math
 from collections import defaultdict 
 from simulation.classes.sim import Simulation
 from simulation.classes.controller import Move
@@ -37,15 +40,24 @@ def convert_to_reward(simulation_data, num_floors, num_elevators):
     wait_times = defaultdict(list)
     num_passengers = defaultdict(list)
 
-
+    overall_wait_time = []
+    overall_num_passenger = []
+    overall_idle_time = []
+    
     idle_times = defaultdict(list)
-    idle_time_1 = []
-    idle_time_2 = []
-
 
     for idx, cycle_data in enumerate(simulation_data):
         cycles.append(cycle_data.cycle_duration) # cycle duration
+        overall_wait_time.append(cycle_data.passengers['wait_time'].sum())
+        overall_num_passenger.append(len(cycle_data.passengers))
+
+        # finding idle time of each cycle
+        end_idle = cycle_data.elevator_state['end_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
+        start_idle = cycle_data.elevator_state['start_time'].loc[cycle_data.elevator_state['state'] == Move.IDLE]
+        idle = end_idle - start_idle
+        overall_idle_time.append(idle.sum())
         
+
         # wait times per cycle
         wait_by_floor = cycle_data.passengers.groupby(['source']).sum()
         zeroes1 = pd.DataFrame(0, index = range(1,num_floors+1), columns = wait_by_floor.columns).astype(float)
@@ -80,10 +92,17 @@ def convert_to_reward(simulation_data, num_floors, num_elevators):
             wait_times[floor].append(cycle.loc[floor])
 
     
+    overall = {
+            "wait_time": overall_wait_time,
+            "num_passenger": overall_num_passenger,
+            "idle_time": overall_idle_time,
+            "cycle_duration": cycles
+            }
 
     rewards['wait_time'] = wait_times
     rewards['num_passenger'] = num_passengers
     rewards["idle_time"] = idle_times
+    rewards["overall"] = overall
 
     # print(rewards)
 
@@ -140,7 +159,14 @@ Confidence Interval : [{result["lower interval"]:.6f}, {result["upper interval"]
     
     """)
 
+def overall_stat(idle_time, wait_time):
+    overall_uti = 1- (idle_time.loc[:, 'expected reward'].sum())/(idle_time.loc[:,'expected cycle length'].sum())
+    overall_wait = (wait_time.loc[:, 'expected reward'].sum())/(wait_time.loc[:,'expected cycle length'].sum())
 
+    print(f"""Overall Analysis:
+Utilisation : {overall_uti: .6f}
+Wait Time: {overall_wait: .6f}
+    """)
 
 
 # #plot scatter plot of wait time and idle time across different floors and elevators 
@@ -171,6 +197,51 @@ def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
     img_path = "Results/{}.png".format(graph_name)
     fig.savefig(img_path)
 
+def  plt_comparison(data):
+
+    wait_t = data.loc[:, 'steady state average'].to_list()
+    wait_t = [[v] for v in wait_t]
+    x = data.loc[:, 'floor' ].to_list()
+    fig = go.Figure()
+
+    fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = "simulation 1", marker_color='#FF4136')) # color="simulation_type"))
+
+    
+    fig.update_traces(
+                    # x = x,
+                    q1 = data.loc[:,'steady state average'].to_list(), 
+                    q3 = data.loc[:,'steady state average'].to_list(), 
+                    median = data.loc[:,'steady state average'].to_list(), 
+                    sd = [0]*6,
+                    lowerfence=data.loc[:, 'lower interval'].to_list(),
+                    upperfence=data.loc[:, 'upper interval'].to_list(), 
+                    mean=data.loc[:,'steady state average'].to_list(),
+                    # line_width = 0.1,
+                    selector = ({'name': 'simulation 1'}) )
+    
+    fig.add_trace(go.Box(y=wait_t , x =x,boxpoints=False, name = "simulation 2", marker_color='#FF851B')) # color="simulation_type"))
+
+    fig.update_traces(
+                    # x = x,
+                    q1 = data.loc[:,'steady state average'].to_list(), 
+                    q3 = data.loc[:,'steady state average'].to_list(), 
+                    median = data.loc[:,'steady state average'].to_list(), 
+                    sd = [0]*6,
+                    lowerfence=data.loc[:, 'lower interval'].to_list(),
+                    upperfence=data.loc[:, 'upper interval'].to_list(), 
+                    mean=data.loc[:,'steady state average'].to_list(),
+                    # line_width = 0.1,
+                    selector = ({'name': 'simulation 2'}) )
+    
+
+    fig.update_layout(
+    yaxis_title='Wait Time',
+    boxmode='group' # group together boxes of the different traces for each value of x
+    )
+    
+    #save graph as image
+    img_path = "Results/{}.png".format('comparison_graph')
+    fig.write_image(img_path)
 
 
 
