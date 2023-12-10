@@ -5,7 +5,7 @@ import pandas as pd
 from simulation.classes.sim import Simulation
 import simulation.classes.groupController as gControl
 
-from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph
+from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat
 
 if __name__ == "__main__":
     print("INITIALIZING SIMULATION\n")
@@ -82,7 +82,9 @@ if __name__ == "__main__":
         print_res(result, f"idle time for elevator {elevator_id}")
     idle_time_data = pd.DataFrame(result_idle_t)
 
-    print(idle_time_data)
     
+    overall_stat(idle_time_data, wait_time_data)
+
+
     plt_graph(wait_time_data, "wait_time")
     plt_graph(idle_time_data, "idle_time")

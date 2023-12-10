@@ -140,7 +140,14 @@ Confidence Interval : [{result["lower interval"]:.6f}, {result["upper interval"]
     
     """)
 
+def overall_stat(idle_time, wait_time):
+    overall_uti = 1- (idle_time.loc[:, 'expected reward'].sum())/(idle_time.loc[:,'expected cycle length'].sum())
+    overall_wait = (wait_time.loc[:, 'expected reward'].sum())/(wait_time.loc[:,'expected cycle length'].sum())
 
+    print(f"""Overall Analysis:
+Utilisation : {overall_uti: .6f}
+Wait Time: {overall_wait: .6f}
+    """)
 
 
 # #plot scatter plot of wait time and idle time across different floors and elevators 
