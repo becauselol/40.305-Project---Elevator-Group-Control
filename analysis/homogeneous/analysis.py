@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 import random
 import pandas as pd
+import plotly.graph_objects as go
+import plotly.express as px
+import math
 from collections import defaultdict 
 from simulation.classes.sim import Simulation
 from simulation.classes.controller import Move
@@ -178,6 +181,51 @@ def plt_graph(data, graph_name, y_lim=(None, None)):
     img_path = "Results/{}.png".format(graph_name)
     fig.savefig(img_path)
 
+def  plt_comparison(data):
+
+    wait_t = data.loc[:, 'steady state average'].to_list()
+    wait_t = [[v] for v in wait_t]
+    x = data.loc[:, 'floor' ].to_list()
+    fig = go.Figure()
+
+    fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = "simulation 1", marker_color='#FF4136')) # color="simulation_type"))
+
+    
+    fig.update_traces(
+                    # x = x,
+                    q1 = data.loc[:,'steady state average'].to_list(), 
+                    q3 = data.loc[:,'steady state average'].to_list(), 
+                    median = data.loc[:,'steady state average'].to_list(), 
+                    sd = [0]*6,
+                    lowerfence=data.loc[:, 'lower interval'].to_list(),
+                    upperfence=data.loc[:, 'upper interval'].to_list(), 
+                    mean=data.loc[:,'steady state average'].to_list(),
+                    # line_width = 0.1,
+                    selector = ({'name': 'simulation 1'}) )
+    
+    fig.add_trace(go.Box(y=wait_t , x =x,boxpoints=False, name = "simulation 2", marker_color='#FF851B')) # color="simulation_type"))
+
+    fig.update_traces(
+                    # x = x,
+                    q1 = data.loc[:,'steady state average'].to_list(), 
+                    q3 = data.loc[:,'steady state average'].to_list(), 
+                    median = data.loc[:,'steady state average'].to_list(), 
+                    sd = [0]*6,
+                    lowerfence=data.loc[:, 'lower interval'].to_list(),
+                    upperfence=data.loc[:, 'upper interval'].to_list(), 
+                    mean=data.loc[:,'steady state average'].to_list(),
+                    # line_width = 0.1,
+                    selector = ({'name': 'simulation 2'}) )
+    
+
+    fig.update_layout(
+    yaxis_title='Wait Time',
+    boxmode='group' # group together boxes of the different traces for each value of x
+    )
+    
+    #save graph as image
+    img_path = "Results/{}.png".format('comparison_graph')
+    fig.write_image(img_path)
 
 
 

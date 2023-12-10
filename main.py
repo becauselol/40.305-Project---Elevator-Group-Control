@@ -5,7 +5,7 @@ import pandas as pd
 from simulation.classes.sim import Simulation
 import simulation.classes.groupController as gControl
 
-from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat
+from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat, plt_comparison
 
 if __name__ == "__main__":
     print("INITIALIZING SIMULATION\n")
@@ -88,3 +88,8 @@ if __name__ == "__main__":
 
     plt_graph(wait_time_data, "wait_time")
     plt_graph(idle_time_data, "idle_time")
+
+
+    ### plot comparison graphs
+    print(wait_time_data)
+    plt_comparison(wait_time_data)
