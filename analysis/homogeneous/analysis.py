@@ -1,6 +1,8 @@
 from scipy.stats import binom
 from scipy import stats
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns 
 import random
 import pandas as pd
 from collections import defaultdict 
@@ -87,6 +89,7 @@ def convert_to_reward(simulation_data, num_floors, num_elevators):
 
     return cycles, rewards
 
+
 def calculate_expected_reward(C, R, alpha=0.05):
     """Takes in 2 arrays and a level of significance alpha
 Arrays are C and R that need to be of equal length
@@ -127,7 +130,6 @@ Arrays are C and R that need to be of equal length
     
     return result
 
-
 def print_res(result, variable_name = ""):
     print(f"""---
 Results : {variable_name}
@@ -137,3 +139,38 @@ Variance Estimate   : {result["sample variance"]:.6f}
 Confidence Interval : [{result["lower interval"]:.6f}, {result["upper interval"]:.6f}]
     
     """)
+
+
+
+
+# #plot scatter plot of wait time and idle time across different floors and elevators 
+def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
+    
+    if graph_name == "wait_time":
+        x_col = 'floor'
+    else:
+        x_col = 'elevator'
+
+    x = data.loc[:,x_col]
+    y = data.loc[:,"steady state average"]
+    
+    y_errormin = data.loc[:, "interval 1-side length"]
+    y_errormax = data.loc[:,"interval 1-side length"]
+    
+    y_error =[y_errormin, y_errormax]
+    
+    # plotting graph
+    fig = plt.figure()
+    plt.errorbar(x, y, yerr = y_error, fmt ='o')
+
+    plt.xlabel('{} number'.format(x_col))
+    plt.ylabel(graph_name)
+    plt.ylim(*y_lim)
+
+    #save graph as image
+    img_path = "Results/{}.png".format(graph_name)
+    fig.savefig(img_path)
+
+
+
+

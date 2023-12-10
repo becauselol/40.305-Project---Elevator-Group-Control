@@ -1,73 +1,45 @@
-import time
-import numpy as np
-import random
-from simulation.classes.sim import Simulation
+from run_experiment import run_experiment, run_analysis
 import simulation.classes.groupController as gControl
 
-from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward
-
 if __name__ == "__main__":
-    print("INITIALIZING SIMULATION\n")
+    print("RUNNING VARIOUS SIMULATIONS\n")
 
+    print("RUNNING")
     # Seed for randomness
-    seed = 1
-    random.seed(seed)
-    np.random.seed(seed)
-
-    # Building Parameters
-    num_floors = 6
-    num_elevators = 3
-    total_arrival_rate = 0.6
-    controller_type = gControl.RandomController
-
-    zoning = {
-            1: [1, 2, 3],
-            2: [1, 4, 5],
-            3: [1, 6]
+    params = {
+            "seed": 1,
+            "num_floors": 6,
+            "num_elevators": 3,
+            "total_arrival_rate": 0.6,
+            "simulation_duration": 72000
             }
-
-    controller_args = {
-            # "zones": zoning
-            }
-
-    # Simulation Parameters
-    simulation_duration = 72000
-
-    # Initialize Simulation Class
-    sim = Simulation(num_floors, num_elevators, total_arrival_rate, controller_type, controller_args)
-
-    print("random seed:", seed)
-    print("simulation duration:", simulation_duration)
-    print("number of floors:", num_floors)
-    print("number of elevators:", num_elevators)
-    print("Group Control Type:", str(controller_type))
-
-    start_time = time.time()
-    print(f"\nSTARTING SIMULATION\n")
     
-    simulation_data = []
+    print("random seed:", params["seed"])
+    print("simulation duration:", params["simulation_duration"])
+    print("number of floors:", params["num_floors"])
+    print("number of elevators:", params["num_elevators"])
+    
+    controller_params = {
+            "idle_floors": [1] * params["num_elevators"]
+            }
 
-    for idx, cycle_data in enumerate(sim.simulate(simulation_duration)):
-        # print("cycle:", idx)
-        # print("cycle duration:", cycle_data.cycle_duration)
-        simulation_data.append(cycle_data)
+    zoning_params = {
+            "idle_floors": [1] * params["num_elevators"],
+            "zones": {
+                    1: [1, 2],
+                    2: [3, 4],
+                    3: [5, 6]
+                }
+            }
 
-    end_time = time.time()
-    print(f"ENDING SIMULATION\n")
-    print(f"EXECUTION TIME: {end_time - start_time:6.2f}s\n")
-    print("Total Number of Cycles:", len(simulation_data))
+    sim_result_random = run_experiment(params, gControl.RandomController, controller_params)
+    sim_result_zoning = run_experiment(params, gControl.ZoningController, zoning_params)
+    sim_result_nearest = run_experiment(params, gControl.NearestElevatorController, controller_params)
 
-    cycle_len_arr, reward_dict = convert_to_reward(simulation_data, num_floors, num_elevators)
+    result_random = run_analysis(params, sim_result_random, "Random") 
+    result_zoning = run_analysis(params, sim_result_zoning, "Zoning")
+    result_nearest = run_analysis(params, sim_result_nearest, "Nearest")
 
-    for floor, rewards in reward_dict["wait_time"].items():
-        num_passengers = reward_dict["num_passenger"][floor]
-        result = calculate_expected_reward(num_passengers, rewards)
-        print_res(result, f"wait time for floor {floor}")
-
-    for floor, rewards in reward_dict["num_passenger"].items():
-        result = calculate_expected_reward(cycle_len_arr, rewards)
-        print_res(result, f"arrival rate for floor {floor}")
-
-    for elevator_id, rewards in reward_dict["idle_time"].items():
-        result = calculate_expected_reward(cycle_len_arr, rewards)
-        print_res(result, f"idle time for elevator {elevator_id}")
+    # We want comparison graph for the different policies
+    # We also want to compare the different idle floor settings
+    # We will then do a comparison
