@@ -1,4 +1,14 @@
+from enum import Enum
 from . import controller 
+
+class State(Enum):
+    MOVING = 1
+    IDLE = 0
+    WAIT = 2
+    WAIT_UPDATE = 3
+    MOVING_TO_IDLE = float("inf")
+
+
 
 
 class Elevator:
@@ -7,6 +17,7 @@ class Elevator:
         self.num_floors = num_floors
         self.capacity = capacity
         self.direction = controller.Move.IDLE
+        self.state = State.IDLE
         self.floor = idle_floor
         self.move_speed = 1
         self.wait_to_idle = 1

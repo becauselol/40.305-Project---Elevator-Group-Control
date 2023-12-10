@@ -93,6 +93,9 @@ class DoorOpenEvent(ElevatorEvent):
     def update(self):
         # consume the internal and external call
         self.controller.consume_int_call(self.floor, self.elevator.direction)
+
+        self.elevator.direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
+
         self.controller.consume_ext_call(self.floor, self.elevator.direction)
 
         # Check if anyone alighting
@@ -114,20 +117,19 @@ class DoorCloseEvent(ElevatorEvent):
 
     def update(self):
         # update the elevators movement
-        new_direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
 
-        if new_direction == Move.WAIT:
-            self.elevator.direction = Move.WAIT
-            if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
-                yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)
-                return
-            else:
-                yield MoveIdleEvent(
-                        self.time + self.elevator.wait_to_idle,
-                        self.floor,
-                        self.building, self.elevator_id
-                        )
-                return        
+        match self.elevator.direction:
+            case Move.WAIT:
+                if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
+                    yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)
+                    return
+                else:
+                    yield MoveIdleEvent(
+                            self.time + self.elevator.wait_to_idle,
+                            self.floor,
+                            self.building, self.elevator_id
+                            )
+                    return        
         elif self.elevator.direction == new_direction and new_direction != Move.WAIT:
             yield NextFloorEvent(
                     self.time + self.elevator.move_speed,

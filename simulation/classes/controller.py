@@ -7,10 +7,7 @@ from . import elevator
 class Move(Enum):
     UP = 1
     DOWN = -1
-    WAIT = 2
-    IDLE = 0
-    MOVE_TO_IDLE = float("inf")
-    WAIT_UPDATE = 3
+    NONE = 0
 
 class ExtCall:
     def __init__(self, floor):
