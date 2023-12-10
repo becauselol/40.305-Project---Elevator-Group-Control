@@ -116,8 +116,11 @@ class DoorCloseEvent(ElevatorEvent):
     def update(self):
         # update the elevators movement
         new_direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
+        print("NEW DIRECTION IS", new_direction)
 
-        if self.elevator.direction == Move.NONE:
+        if new_direction == Move.NONE:
+            print("SETTING STATE TO WAIT")
+            self.elevator.direction = Move.NONE
             self.elevator.state = State.WAIT
             if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
                 yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)

@@ -153,9 +153,9 @@ class LiftController(Controller):
         Returns the next direction
         """
         # Any internal calls left?
-        # print("int call:", self.int_call)
-        # print("ext up call:", [e_call.up_call for e_call in self.ext_call])
-        # print("ext down call:", [e_call.down_call for e_call in self.ext_call])
+        print("int call:", self.int_call)
+        print("ext up call:", [e_call.up_call for e_call in self.ext_call])
+        print("ext down call:", [e_call.down_call for e_call in self.ext_call])
         if self.int_call:
             # if yes continue same direction
             return move_direction

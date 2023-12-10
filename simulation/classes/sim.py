@@ -74,7 +74,12 @@ class Simulation:
         while self.event_queue[0][0] < max_time:
 
             event_time, event = heappop(self.event_queue)
+            if hasattr(event, "elevator_id"):
+                print(event.elevator_id)
+                print(event.elevator.state)
+                print(event.elevator.direction)
             print(event)
+            
 
             previous_elevator_state = {i: self.elevators[i].state for i in self.elevators.keys()}
 
