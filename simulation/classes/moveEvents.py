@@ -94,9 +94,6 @@ class DoorOpenEvent(ElevatorEvent):
     def update(self):
         # consume the internal and external call
         self.controller.consume_int_call(self.floor, self.elevator.direction)
-
-        self.elevator.direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
-
         self.controller.consume_ext_call(self.floor, self.elevator.direction)
 
         # Check if anyone alighting
@@ -106,13 +103,7 @@ class DoorOpenEvent(ElevatorEvent):
 
         # always try to board even if there is no one this is so we will check
         # as long as there is movement
-        if self.elevator.direction != Move.NONE:
-            yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
-
-        # if there is no movement, go straight to door close
-        else:
-            yield DoorCloseEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
-
+        yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
 
 
 class DoorCloseEvent(ElevatorEvent):
@@ -124,6 +115,7 @@ class DoorCloseEvent(ElevatorEvent):
 
     def update(self):
         # update the elevators movement
+        new_direction = self.controller.where_next_stationary(self.elevator.floor, self.elevator.direction)
 
         if self.elevator.direction == Move.NONE:
             self.elevator.state = State.WAIT
@@ -138,13 +130,18 @@ class DoorCloseEvent(ElevatorEvent):
                         )
                 return        
         # if it is moving, we just go
-        else:
+        elif self.elevator.direction == new_direction and new_direction != Move.NONE:
             yield NextFloorEvent(
                     self.time + self.elevator.move_speed,
                     self.floor + self.elevator.direction.value,
                     self.building, self.elevator_id
                     )
             return
+
+        elif self.elevator.direction != new_direction:
+           self.elevator.direction = new_direction
+           yield DoorOpenEvent(self.time, self.floor, self.building, self.elevator_id)
+           return
 
 
 class MoveIdleEvent(ElevatorEvent):

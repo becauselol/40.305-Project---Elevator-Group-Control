@@ -74,6 +74,7 @@ class Simulation:
         while self.event_queue[0][0] < max_time:
 
             event_time, event = heappop(self.event_queue)
+            print(event)
 
             previous_elevator_state = {i: self.elevators[i].state for i in self.elevators.keys()}
 
@@ -85,6 +86,7 @@ class Simulation:
                     # remove any existing MoveIdleEvent 
                     # remove the corresponding MoveIdleEvent
                     new_queue = [(t, e) for t, e in self.event_queue if not (isinstance(e, moveE.MoveIdleEvent) and e.elevator_id == new_event.elevator_id)]
+                    print("Removing for elevator", new_event.elevator_id)
                     self.event_queue = new_queue
                     heapify(self.event_queue)
 

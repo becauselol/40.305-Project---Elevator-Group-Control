@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # Building Parameters
     num_floors = 6
-    num_elevators = 3
+    num_elevators = 2
     total_arrival_rate = 0.6
     controller_type = gControl.RandomController
 
