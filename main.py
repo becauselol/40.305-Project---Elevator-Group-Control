@@ -1,8 +1,11 @@
+
 from tqdm import tqdm
 import pandas as pd
+
 from run_experiment import run_experiment, run_analysis
 import simulation.classes.groupController as gControl
 from simulation.utils import get_all_idle_combinations
+
 
 from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat, plt_comparison
 
@@ -11,6 +14,7 @@ if __name__ == "__main__":
 
     print("RUNNING")
     output_file = "all_data.tsv"
+
     # Seed for randomness
     params = {
             "seed": 1,
@@ -71,6 +75,7 @@ if __name__ == "__main__":
 
     collated_df = pd.DataFrame(collated_result)
     collated_df.to_csv(output_file, sep="\t", index=False)
+
     # We want comparison graph for the different policies
     # We also want to compare the different idle floor settings
     # We will then do a comparison

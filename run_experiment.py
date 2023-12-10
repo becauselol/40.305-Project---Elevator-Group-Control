@@ -18,11 +18,13 @@ def run_experiment(sim_params, controller, controller_params):
             group_controller=controller, 
             controller_args=controller_params)
 
+
     start_time = time.time()
 
     simulation_data = list(sim.simulate(sim_params["simulation_duration"]))
 
     end_time = time.time()
+
 
     return simulation_data
 
@@ -51,6 +53,7 @@ def run_analysis(sim_params, simulation_data, label):
         overall_stat_arr.append(result)
 
     overall_stat_data = pd.DataFrame(overall_stat_arr)
+
 
     for floor, rewards in reward_dict["wait_time"].items():
         num_passengers = reward_dict["num_passenger"][floor]
