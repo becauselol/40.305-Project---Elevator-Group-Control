@@ -154,7 +154,7 @@ Wait Time: {overall_wait: .6f}
 
 
 # #plot scatter plot of wait time and idle time across different floors and elevators 
-def plt_graph(data, graph_name, y_lim=(None, None)):
+def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
     
     if graph_name == "wait_time":
         x_col = 'floor'
