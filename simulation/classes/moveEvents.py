@@ -1,6 +1,7 @@
 from .event import MoveEvent, ElevatorEvent
 from . import passengerEvents as passE
 from .controller import Move
+from .elevator import State
 
 """
 NOTE: time is the time that the event occurs
@@ -104,7 +105,13 @@ class DoorOpenEvent(ElevatorEvent):
             yield passE.AlightEvent(self.time, self.floor, self.building, self.elevator_id)
 
         # always try to board even if there is no one this is so we will check
-        yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
+        # as long as there is movement
+        if self.elevator.direction != Move.NONE:
+            yield passE.BoardEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
+
+        # if there is no movement, go straight to door close
+        else:
+            yield DoorCloseEvent(self.time + self.elevator.open_door_time, self.floor, self.building, self.elevator_id)
 
 
 
@@ -119,29 +126,26 @@ class DoorCloseEvent(ElevatorEvent):
         # update the elevators movement
 
         match self.elevator.direction:
-            case Move.WAIT:
+            case Move.NONE:
                 if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
                     yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)
                     return
                 else:
+                    self.elevator.state = State.MOVING_TO_IDLE
                     yield MoveIdleEvent(
                             self.time + self.elevator.wait_to_idle,
                             self.floor,
                             self.building, self.elevator_id
                             )
                     return        
-        elif self.elevator.direction == new_direction and new_direction != Move.WAIT:
-            yield NextFloorEvent(
-                    self.time + self.elevator.move_speed,
-                    self.floor + self.elevator.direction.value,
-                    self.building, self.elevator_id
-                    )
-            return
-        elif self.elevator.direction != new_direction:
-            self.elevator.direction = new_direction
-            yield DoorOpenEvent(self.time, self.floor, self.building, self.elevator_id)
-            return
-
+            # if it is moving, we just go
+            case _:
+                yield NextFloorEvent(
+                        self.time + self.elevator.move_speed,
+                        self.floor + self.elevator.direction.value,
+                        self.building, self.elevator_id
+                        )
+                return
 
                 
 class MoveIdleEvent(ElevatorEvent):
@@ -155,7 +159,7 @@ class MoveIdleEvent(ElevatorEvent):
         # now that it is triggered, it should trigger a movement that allows the waiting elevator to move to the idle state
         
         # also set the elevator to a special state that cannot be disturbed
-        self.elevator.direction = Move.MOVE_TO_IDLE
+        self.elevator.state = State.MOVING_TO_IDLE
 
         # calculate the time it takes to reach the idle floor
         time_to_move_to_idle = self.controller.time_to_idle_floor(self.elevator)
@@ -193,8 +197,6 @@ class UpdateMoveEvent(ElevatorEvent):
         return f"Elevator {self.elevator_id} was in IDLE/WAIT, updating move"
 
     def update(self):
-        if self.elevator.direction == Move.MOVE_TO_IDLE:
-            raise Exception("Moving to Idle, this event can't occur")
         # First remove any WaitIdleEvents in the queue
         if self.elevator.direction == Move.WAIT:
             # we need to eliminate the MoveIdleEvent
@@ -208,27 +210,3 @@ class UpdateMoveEvent(ElevatorEvent):
         # does so by triggering a NextFloorEvent
         # without any delay
         yield NextFloorEvent(self.time, self.elevator.floor, self.building, self.elevator_id)
-
-
-
-# This EVENT is specific to the GroupController,
-# It should return the corresponding result
-#   New elevator could start moving
-#       If this scenario occurs and the elevator was in WAIT,
-#       Then the lift's MoveIdleEvent needs to be cleared
-#   Or an already moving elevator is assigned to the call
-#class GroupControllerUpdate(MoveEvent):
-#    def __init__(self, time, floor, building):
-#        super().__init__(time, floor, building)
-#
-#    def describe(self):
-#        return f"GroupController deciding which elevator to assign call to"
-#
-#    def update(self):
-#        self.groupController.respond_new_ext_call()
-#        yield UpdateMoveEvent(self.time, self.elevator.floor, )
-
-
-
-
-

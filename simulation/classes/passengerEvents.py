@@ -47,8 +47,8 @@ class ArrivalEvent(PassengerEvent):
             # If it is a new call that is not handled
             # Then we need to assign the call to a lift
             self.elevator = self.building.elevators[assigned_elevator]
-            if self.elevator.direction in [Move.IDLE, Move.WAIT]:
-                self.elevator.direction = Move.WAIT_UPDATE
+            if self.elevator.state in [State.IDLE, State.WAIT]:
+                self.elevator.state = State.MOVING
                 yield moveE.UpdateMoveEvent(self.time, self.floor, self.building, assigned_elevator)
 
 

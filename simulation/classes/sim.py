@@ -24,7 +24,7 @@ class Simulation:
         self.elevators = self.building.elevators
         self.controller = self.building.groupController
 
-        self.cycle_data = DataStore(self.num_floors, 0, self.num_elevators, self.elevators[1].direction)
+        self.cycle_data = DataStore(self.num_floors, 0, self.num_elevators, self.elevators[1].state)
         
 
     def initialize_arrivals(self, rate_matrix):
@@ -61,36 +61,20 @@ class Simulation:
         self.reset_simulation()
 
         self.initialize_building()
-        self.reset_cycle_data(0, self.elevators[1].direction)
+        self.reset_cycle_data(0, self.elevators[1].state)
 
         uniform_rate = 1/ (self.total_arrival_rate / ((self.num_floors**2) - self.num_floors))
         print("rate is", uniform_rate)
         rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
 
         self.initialize_arrivals(rate_matrix)
-        # print(self.building.elevator.direction)
+        # print(self.building.elevator.state)
         count = 0
         while self.event_queue[0][0] < max_time:
 
             event_time, event = heappop(self.event_queue)
 
-            # if self.elevators[1].direction == Move.IDLE:
-            # print(event)
-#            print(self.elevators[2].get_num_passengers())
-#            for t, e in self.event_queue:
-#                one_events = [e for t, e in self.event_queue if (hasattr(e, "elevator_id") and e.elevator_id == 1)]
-#                num_one_events = len(one_events)
-#                if num_one_events > 1:
-#                    print("one", one_events)
-#
-#                two_events = [t for t, e in self.event_queue if (hasattr(e, "elevator_id") and e.elevator_id == 2)]
-#                num_two_events = len(two_events)
-#                if num_two_events > 1:
-#                    print("two", two_events)
-            # print(self.elevators[1].get_num_passengers())
-            # print(self.elevators[1].direction)
-
-            previous_elevator_state = {i: self.elevators[i].direction for i in self.elevators.keys()}
+            previous_elevator_state = {i: self.elevators[i].state for i in self.elevators.keys()}
 
             # RUN the updates and create any new events as required
             for new_event in event.update():
@@ -105,7 +89,7 @@ class Simulation:
 
                 heappush(self.event_queue, (new_event.time, new_event))
 
-            new_elevator_state = {i: self.elevators[i].direction for i in self.elevators.keys()}
+            new_elevator_state = {i: self.elevators[i].state for i in self.elevators.keys()}
 
             for i in self.elevators.keys():
                 if previous_elevator_state[i] != new_elevator_state[i]:
@@ -115,10 +99,10 @@ class Simulation:
             if removed_passengers:
                 self.cycle_data.update_passengers(removed_passengers)
 
-            if isinstance(event, moveE.ReachIdleEvent) and all([Move.IDLE == state for state in [elevator.direction for elevator in self.elevators.values()]]):
+            if isinstance(event, moveE.ReachIdleEvent) and all([State.IDLE == state for state in [elevator.state for elevator in self.elevators.values()]]):
                 count += 1
                 # yield the cycle data
                 self.cycle_data.finalize(event_time)
                 yield self.cycle_data
 
-                self.reset_cycle_data(event_time, self.elevators[1].direction)
+                self.reset_cycle_data(event_time, self.elevators[1].state)
