@@ -95,7 +95,8 @@ def convert_to_reward(simulation_data, num_floors, num_elevators):
     overall = {
             "wait_time": overall_wait_time,
             "num_passenger": overall_num_passenger,
-            "idle_time": overall_idle_time
+            "idle_time": overall_idle_time,
+            "cycle_duration": cycles
             }
 
     rewards['wait_time'] = wait_times
