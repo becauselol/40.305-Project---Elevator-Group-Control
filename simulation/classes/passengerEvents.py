@@ -30,23 +30,26 @@ class ArrivalEvent(PassengerEvent):
     def update(self):
         # add passenger to the floor
         passenger = Passenger(self.time, self.source, self.dest)
-        self.building.add_passenger_to_floor(self.floor, passenger)
+
+        is_new_passenger = self.building.add_passenger_to_floor(self.floor, passenger)
         # add the external call accordingly
         # check which elevator is this assigned to
-        assigned_elevator = self.groupController.assign_call(self.floor, passenger.get_direction(), self.time)
 
-        self.groupController.add_ext_call_to_lift(assigned_elevator, self.floor, passenger.get_direction(), self.time)
 
         yield self.next_arrival_event()
 
-        # elevator will only be updated if it is in IDLE or WAIT
-        # Check with the groupController, if it is a new call
-        # If it is a new call that is not handled
-        # Then we need to assign the call to a lift
-        self.elevator = self.building.elevators[assigned_elevator]
-        if self.elevator.direction in [Move.IDLE, Move.WAIT]:
-            self.elevator.direction = Move.WAIT_UPDATE
-            yield moveE.UpdateMoveEvent(self.time, self.floor, self.building, assigned_elevator)
+        if is_new_passenger:
+            assigned_elevator = self.groupController.assign_call(self.floor, passenger.get_direction(), self.time)
+
+            self.groupController.add_ext_call_to_lift(assigned_elevator, self.floor, passenger.get_direction(), self.time)
+            # elevator will only be updated if it is in IDLE or WAIT
+            # Check with the groupController, if it is a new call
+            # If it is a new call that is not handled
+            # Then we need to assign the call to a lift
+            self.elevator = self.building.elevators[assigned_elevator]
+            if self.elevator.direction in [Move.IDLE, Move.WAIT]:
+                self.elevator.direction = Move.WAIT_UPDATE
+                yield moveE.UpdateMoveEvent(self.time, self.floor, self.building, assigned_elevator)
 
 
 class AlightEvent(PassengerElevatorEvent):

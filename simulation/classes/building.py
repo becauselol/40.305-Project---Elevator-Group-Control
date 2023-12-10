@@ -30,7 +30,9 @@ class Building:
         return len(self.get_boarding(floor, move_direction)) > 0
 
     def add_passenger_to_floor(self, floor, passenger):
+        is_new_passenger = (len(self.waiting_people[floor - 1][passenger.get_direction()]) == 0)
         self.waiting_people[floor - 1][passenger.get_direction()].append(passenger)
+        return is_new_passenger
 
 
     def remove_passenger_from_elevator(self, elevator_id, floor):
