@@ -125,29 +125,28 @@ class DoorCloseEvent(ElevatorEvent):
     def update(self):
         # update the elevators movement
 
-        match self.elevator.direction:
-            case Move.NONE:
-                if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
-                    yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)
-                    return
-                else:
-                    self.elevator.state = State.MOVING_TO_IDLE
-                    yield MoveIdleEvent(
-                            self.time + self.elevator.wait_to_idle,
-                            self.floor,
-                            self.building, self.elevator_id
-                            )
-                    return        
-            # if it is moving, we just go
-            case _:
-                yield NextFloorEvent(
-                        self.time + self.elevator.move_speed,
-                        self.floor + self.elevator.direction.value,
+        if self.elevator.direction == Move.NONE:
+            self.elevator.state = State.WAIT
+            if self.elevator.floor == self.controller.get_idle_floor(self.elevator):
+                yield ReachIdleEvent(self.time, self.floor, self.building, self.elevator_id)
+                return
+            else:
+                yield MoveIdleEvent(
+                        self.time + self.elevator.wait_to_idle,
+                        self.floor,
                         self.building, self.elevator_id
                         )
-                return
+                return        
+        # if it is moving, we just go
+    else:
+        yield NextFloorEvent(
+                self.time + self.elevator.move_speed,
+                self.floor + self.elevator.direction.value,
+                self.building, self.elevator_id
+                )
+        return
 
-                
+
 class MoveIdleEvent(ElevatorEvent):
     def __init__(self, time, floor, building, elevator_id):
         super().__init__(time, floor, building, elevator_id)
@@ -176,7 +175,7 @@ class ReachIdleEvent(ElevatorEvent):
         return f"Elevator {self.elevator_id} reached the IDLE state at {self.floor}"
 
     def update(self):
-        self.elevator.direction = Move.IDLE
+        self.elevator.state = State.IDLE
         self.elevator.floor = self.floor
 
         # check if there are any calls
@@ -198,7 +197,7 @@ class UpdateMoveEvent(ElevatorEvent):
 
     def update(self):
         # First remove any WaitIdleEvents in the queue
-        if self.elevator.direction == Move.WAIT:
+        if self.elevator.state == State.WAIT:
             # we need to eliminate the MoveIdleEvent
             pass
 

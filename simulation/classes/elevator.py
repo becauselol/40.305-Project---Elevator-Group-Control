@@ -13,7 +13,7 @@ class Elevator:
         self.id = id
         self.num_floors = num_floors
         self.capacity = capacity
-        self.direction = controller.Move.IDLE
+        self.direction = controller.Move.NONE
         self.state = State.IDLE
         self.floor = idle_floor
         self.move_speed = 1
