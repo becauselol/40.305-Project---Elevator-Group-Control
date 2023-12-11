@@ -197,16 +197,20 @@ def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
     img_path = "Results/{}.png".format(graph_name)
     fig.savefig(img_path)
 
-def  plt_comparison(result, controllers):
+def  plt_comparison(result, controllers, graph_name):
 
 
     fig = go.Figure()
 
+    if graph_name == "wait time":
+        x_col = 'floor'
+    else:
+        x_col = 'elevator'
 
     for data, controller in zip(result, controllers):
         wait_t = data.loc[:, 'steady state average'].to_list()
         wait_t = [[v] for v in wait_t]
-        x = data.loc[:, 'floor' ].to_list()
+        x = data.loc[:, x_col ].to_list()
         fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = controller)) # color="simulation_type"))
 
         fig.update_traces(
@@ -224,7 +228,7 @@ def  plt_comparison(result, controllers):
         
 
     fig.update_layout(
-    yaxis_title='Wait Time',
+    yaxis_title=graph_name,
     boxmode='group' # group together boxes of the different traces for each value of x
     )
     
