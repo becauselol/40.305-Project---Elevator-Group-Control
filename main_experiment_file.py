@@ -7,7 +7,7 @@ import simulation.classes.arrival_pattern as arrPattern
 from simulation.utils import get_all_idle_combinations
 
 
-from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat, plt_comparison
+from analysis.utils import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat, plt_comparison
 
 if __name__ == "__main__":
     print("RUNNING VARIOUS SIMULATIONS\n")
