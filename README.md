@@ -3,6 +3,8 @@
 Project for 40.305 Adv Topics in Stochastic Modelling
 Based on Elevator Group Control Problem
 
+For more information about the project report details, please go to the [wiki](https://github.com/becauselol/40.305-Project---Elevator-Group-Control/wiki)
+
 ## Installation and running the simulation
 Requires Python >= 3.10
 Create a new virtual environment and activate it:
