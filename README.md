@@ -3,25 +3,8 @@
 Project for 40.305 Adv Topics in Stochastic Modelling
 Based on Elevator Group Control Problem
 
-## Data Analysed
-- Wait Times of passengers by floor
-- Idle Times of each elevator
-- Number of passengers each elevator service
-
-## Algorithms Tested
-- Random Assignment (Control)
-- Zoning (Sectoring)
-- Nearest Elevator (Feasibility Score)
-- Lifts dedicated to moving up and down
-- Custom Feasibility Score (Based on IDLE, distance, movement)
-
-## Various Arrival distributions
-- Uniform
-- 1st Floor heavy
-- Multi-floor heavy
-
-## Installation
-Requires Python >= 3.11
+## Installation and running the simulation
+Requires Python >= 3.10
 Create a new virtual environment and activate it:
 
 ```shell
@@ -53,4 +36,37 @@ Code for the analysis can be found in `/analysis`.
 
 A sample jupyter notebook is shown in `interactive_analysis.ipynb`
 The simulation can be imported as shown in the notebook.
+
+
+## Objectives to Minimize
+- Wait Times of passengers by floor
+- Idle Times of each elevator
+
+## Variables Tested
+### Controller Type
+- Random Assignment (Control)
+- Zoning (Sectoring)
+- Nearest Elevator (Feasibility Score)
+
+### Idle Floor Configuration
+
+## Various Arrival distributions
+To test the limits of various Idle Configurations, we experimented with different kinds of arrival distributions
+Namely
+- Uniform Arrival Distribution
+- Ground Floor Heavy Arrival Distribution
+
+### Uniform Arrival Assumptions
+- Assumes that an equal amount of people arrive at every floor
+- Equal proportion of people want to go from one floor to every other floor
+
+### Ground Floor Heavy
+- A fixed proportion of people arriving and leaving every floor
+- An equal proportion of people go from ground floor to every other floor
+- Same proportion of people going from ground to other floors is same as proportion going from other floors to ground
+- Remaining proportion of people going between the remaining floors are split equally
+
+## Future Works
+- Update algorithm of elevator movement. Current one has some flaws in logic
+- Also create elevator that has capacity constraints, currently there are no limitations to capacity
 
