@@ -4,7 +4,7 @@ import random
 import pandas as pd
 from simulation.classes.sim import Simulation
 
-from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph
+from analysis.utils import print_res, convert_to_reward, calculate_expected_reward, plt_graph
 
 def run_experiment(sim_params, arrival_pattern, arrival_args, controller, controller_params):
     random.seed(sim_params["seed"])
@@ -87,6 +87,3 @@ def run_analysis(sim_params, simulation_data, label):
             "num_cycles": len(cycle_len_arr)
             }
     return results
-
-def run_comparison(*args):
-    pass

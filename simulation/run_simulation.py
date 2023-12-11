@@ -2,6 +2,10 @@ import numpy as np
 import random
 from simulation import Simulation
 
+"""
+Simple Sample of how a simulation can be run
+"""
+
 random.seed(1)
 np.random.seed(1)
 num_floors = 4
