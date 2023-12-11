@@ -2,11 +2,11 @@ import os
 from tqdm import tqdm
 import pandas as pd
 
-from analysis.run_experiment import run_experiment, run_analysis
 import simulation.classes.groupController as gControl
 import simulation.classes.arrival_pattern as arrPattern
 from simulation.utils import get_all_idle_combinations
 
+from analysis.run_experiment import run_experiment, run_analysis
 from analysis.utils import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat, plt_comparison
 
 if __name__ == "__main__":
