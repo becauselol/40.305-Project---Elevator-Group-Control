@@ -6,9 +6,18 @@ from run_experiment import run_experiment, run_analysis
 import simulation.classes.groupController as gControl
 import simulation.classes.arrival_pattern as arrPattern
 from simulation.utils import get_all_idle_combinations
+import argparse
 
 
 from analysis.utils import print_res, convert_to_reward, calculate_expected_reward, plt_graph, overall_stat, plt_comparison
+
+parser = argparse.ArgumentParser(description="Run a simulation and save statistics to a file")
+parser.add_argument("--seed", help="define seed for experiment")
+parser.add_argument("--elevators", help="set number of elevators")
+parser.add_argument("--floors", help="set number of floors")
+parser.add_argument("--duration", help="set simulation duration")
+parser.add_argument("--control", help="set group control policy")
+parser.add_argument("--arrv", help="define arrival pattern")
 
 if __name__ == "__main__":
     print("RUNNING VARIOUS SIMULATIONS\n")
