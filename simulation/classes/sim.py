@@ -16,6 +16,7 @@ class Simulation:
         self.num_elevators = num_elevators
         self.arrival_pattern = arrival_pattern(num_floors, **arrival_args)
         self.arrival_rate_matrix = self.arrival_pattern.get_rate_matrix()
+        print(arrival_rate_matrix)
         self.total_arrival_rate = total_arrival_rate
         self.event_queue = []
         self.group_controller = group_controller
@@ -36,18 +37,18 @@ class Simulation:
         for arr in self.arrival_rate_matrix:
             assert len(arr) == self.num_floors
 
-        for i in range(self.num_floors):
-            for j in range(self.num_floors):
+        for i in range(1, self.num_floors + 1):
+            for j in range(1, self.num_floors + 1):
                 if i == j:
                     continue
-                rate = self.arrival_rate_matrix[i][j]
+                rate = self.arrival_pattern.get_arrival_rate(i, j)
                 assert rate != 0
                 arrival_time = exponential(rate)
                 event = passE.ArrivalEvent(
                         arrival_time,
-                        i + 1,
+                        i,
                         self.building,
-                        j + 1,
+                        j,
                         rate
                     )
                 self.event_queue.append((arrival_time, event))
@@ -66,8 +67,6 @@ class Simulation:
         self.initialize_building()
         self.reset_cycle_data(0, self.elevators[1].direction)
 
-        uniform_rate = 1/ (self.total_arrival_rate / ((self.num_floors**2) - self.num_floors))
-        rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
 
         self.initialize_arrivals(rate_matrix)
         # print(self.building.elevator.direction)
