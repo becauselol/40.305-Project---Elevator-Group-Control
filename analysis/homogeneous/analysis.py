@@ -243,5 +243,28 @@ def  plt_comparison(data):
     img_path = "Results/{}.png".format('comparison_graph')
     fig.write_image(img_path)
 
+def plot(df, text = False):
+    plt.figure(figsize=(15,8))
+    sns.scatterplot(data=df, x='wait_time', y= 'idle_time', hue="controller")
 
+    if text:
+        for i in df.index:
+            plt.text(df.loc[i, 'wait_time'], df.loc[i, 'idle_time'], df.loc[i, 'idle_floor_config'])
+
+
+
+def best(all_data_df, best_type):
+
+    #get best config
+    all_data_df['wait_time_w_interval'] = pd.DataFrame(all_data_df['wait_time'] + all_data_df['wait_time_interval'])
+    best = all_data_df.nsmallest(n=1, columns='wait_time_w_interval')
+    best_config = best.loc[:,best_type].values[0]
+
+    print("Best {a}: {b}".format(a = best_type ,b = best_config))
+
+    # list of all the different controllers with same config
+    comparison = all_data_df.loc[all_data_df[best_type] == best_config]
+
+
+    return comparison, best_config
 
