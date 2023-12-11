@@ -4,6 +4,7 @@ import pandas as pd
 
 from run_experiment import run_experiment, run_analysis
 import simulation.classes.groupController as gControl
+import simulation.classes.arrival_pattern as arrPattern
 from simulation.utils import get_all_idle_combinations
 
 
@@ -13,14 +14,13 @@ if __name__ == "__main__":
     print("RUNNING VARIOUS SIMULATIONS\n")
 
     print("RUNNING")
-    output_file = "all_data.tsv"
+    output_file = "all_data_groundheavy.tsv"
 
     # Seed for randomness
     params = {
             "seed": 1,
             "num_floors": 6,
             "num_elevators": 3,
-            "total_arrival_rate": 0.6,
             "simulation_duration": 72000
             }
     
@@ -37,14 +37,16 @@ if __name__ == "__main__":
                 }
             }
 
+    arrival_pattern = arrPattern.GroundHeavy
+    arrival_args = {
+            "num_floors": params["num_floors"],
+            "total_arrival_rate": 0.6,
+            "ground_percentage": 0.35
+            }
     conditions = {
             "Random": (gControl.RandomController, {}),
             "Zoning": (gControl.ZoningController, zoning_params),
             "Nearest": (gControl.NearestElevatorController, {})
-            }
-    
-    controller_params = {
-            "idle_floors": [1] * params["num_elevators"]
             }
     
     all_idle_combinations = get_all_idle_combinations(params["num_floors"], params["num_elevators"])
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     for idle_floor_combination in tqdm(all_idle_combinations):
         for controller_name, (controller_class, controller_params) in conditions.items():
             controller_params["idle_floors"] = idle_floor_combination
-            sim_result = run_experiment(params, controller_class, controller_params)
+            sim_result = run_experiment(params, arrival_pattern, arrival_args, controller_class, controller_params)
     
             result = run_analysis(params, sim_result, controller_name) 
             result["overall_stats"] = result["overall_stats"].set_index("stat label")

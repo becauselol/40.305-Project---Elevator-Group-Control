@@ -14,10 +14,8 @@ class Simulation:
     def __init__(self, num_floors, num_elevators, arrival_pattern, arrival_args, group_controller, controller_args):
         self.num_floors = num_floors
         self.num_elevators = num_elevators
-        self.arrival_pattern = arrival_pattern(num_floors, **arrival_args)
+        self.arrival_pattern = arrival_pattern(**arrival_args)
         self.arrival_rate_matrix = self.arrival_pattern.get_rate_matrix()
-        print(arrival_rate_matrix)
-        self.total_arrival_rate = total_arrival_rate
         self.event_queue = []
         self.group_controller = group_controller
         self.controller_args = controller_args
@@ -68,7 +66,7 @@ class Simulation:
         self.reset_cycle_data(0, self.elevators[1].direction)
 
 
-        self.initialize_arrivals(rate_matrix)
+        self.initialize_arrivals()
         # print(self.building.elevator.direction)
         count = 0
         while self.event_queue[0][0] < max_time:
