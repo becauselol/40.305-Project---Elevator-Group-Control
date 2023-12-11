@@ -197,42 +197,31 @@ def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
     img_path = "Results/{}.png".format(graph_name)
     fig.savefig(img_path)
 
-def  plt_comparison(data):
+def  plt_comparison(result, controllers):
 
-    wait_t = data.loc[:, 'steady state average'].to_list()
-    wait_t = [[v] for v in wait_t]
-    x = data.loc[:, 'floor' ].to_list()
+
     fig = go.Figure()
 
-    fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = "simulation 1", marker_color='#FF4136')) # color="simulation_type"))
 
-    
-    fig.update_traces(
-                    # x = x,
-                    q1 = data.loc[:,'steady state average'].to_list(), 
-                    q3 = data.loc[:,'steady state average'].to_list(), 
-                    median = data.loc[:,'steady state average'].to_list(), 
-                    sd = [0]*6,
-                    lowerfence=data.loc[:, 'lower interval'].to_list(),
-                    upperfence=data.loc[:, 'upper interval'].to_list(), 
-                    mean=data.loc[:,'steady state average'].to_list(),
-                    # line_width = 0.1,
-                    selector = ({'name': 'simulation 1'}) )
-    
-    fig.add_trace(go.Box(y=wait_t , x =x,boxpoints=False, name = "simulation 2", marker_color='#FF851B')) # color="simulation_type"))
+    for data, controller in zip(result, controllers):
+        wait_t = data.loc[:, 'steady state average'].to_list()
+        wait_t = [[v] for v in wait_t]
+        x = data.loc[:, 'floor' ].to_list()
+        fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = controller)) # color="simulation_type"))
 
-    fig.update_traces(
-                    # x = x,
-                    q1 = data.loc[:,'steady state average'].to_list(), 
-                    q3 = data.loc[:,'steady state average'].to_list(), 
-                    median = data.loc[:,'steady state average'].to_list(), 
-                    sd = [0]*6,
-                    lowerfence=data.loc[:, 'lower interval'].to_list(),
-                    upperfence=data.loc[:, 'upper interval'].to_list(), 
-                    mean=data.loc[:,'steady state average'].to_list(),
-                    # line_width = 0.1,
-                    selector = ({'name': 'simulation 2'}) )
-    
+        fig.update_traces(
+                        # x = x,
+                        q1 = data.loc[:,'steady state average'].to_list(), 
+                        q3 = data.loc[:,'steady state average'].to_list(), 
+                        median = data.loc[:,'steady state average'].to_list(), 
+                        sd = [0]*6,
+                        lowerfence=data.loc[:, 'lower interval'].to_list(),
+                        upperfence=data.loc[:, 'upper interval'].to_list(), 
+                        mean=data.loc[:,'steady state average'].to_list(),
+                        # line_width = 0.1,
+                        selector = ({'name': controller}) )
+
+        
 
     fig.update_layout(
     yaxis_title='Wait Time',
@@ -243,13 +232,18 @@ def  plt_comparison(data):
     img_path = "Results/{}.png".format('comparison_graph')
     fig.write_image(img_path)
 
-def plot(df, text = False):
+def plot(df,name, text = False):
     plt.figure(figsize=(15,8))
-    sns.scatterplot(data=df, x='wait_time', y= 'idle_time', hue="controller")
+    scatter = sns.scatterplot(data=df, x='wait_time', y= 'idle_time', hue="controller")
 
     if text:
         for i in df.index:
             plt.text(df.loc[i, 'wait_time'], df.loc[i, 'idle_time'], df.loc[i, 'idle_floor_config'])
+    
+    #save graph as image
+    fig = scatter.get_figure()
+    img_path = "Results/{}.png".format(name)
+    fig.savefig(img_path)
 
 
 
