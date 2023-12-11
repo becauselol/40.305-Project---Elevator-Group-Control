@@ -1,7 +1,7 @@
 from tqdm import tqdm
 import pandas as pd
 
-from run_experiment import run_experiment, run_analysis
+from analysis.run_experiment import run_experiment, run_analysis
 import simulation.classes.groupController as gControl
 import simulation.classes.arrival_pattern as arrPattern
 from simulation.utils import get_all_idle_combinations
@@ -46,8 +46,8 @@ if __name__ == "__main__":
             }
 
     arrival_patterns = {
-            "Uniform": ("all_data_uniform.tsv", arrPattern.UniformArrival, uniform_arrival_args),
-            "Ground Heavy": ("all_data_groundheavy.tsv", arrPattern.GroundHeavy, ground_heavy_args)
+            "Ground Heavy": ("all_data_groundheavy.tsv", arrPattern.GroundHeavy, ground_heavy_args),
+            "Uniform": ("all_data_uniform.tsv", arrPattern.UniformArrival, uniform_arrival_args)
             }
 
     conditions = {

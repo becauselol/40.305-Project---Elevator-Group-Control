@@ -78,7 +78,7 @@ class GroundHeavy(ArrivalPattern):
         ground_rate = (self.ground_percentage / (self.num_floors - 1))
 
         assert ground_rate < other_percentage, "too many people going up"
-        residual_percentage = (other_percentage - ground_rate) / (self.num_floors - 1)
+        residual_percentage = (other_percentage - ground_rate) / (self.num_floors - 2)
 
         for j in range(1, len(prob_matrix[0])):
             prob_matrix[0][j] = ground_rate
