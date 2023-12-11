@@ -197,12 +197,12 @@ def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
     img_path = "Results/{}.png".format(graph_name)
     fig.savefig(img_path)
 
-def  plt_comparison(result, controllers, graph_name):
+def  plt_comparison(result, controllers, graph_type, graph_name ):
 
 
     fig = go.Figure()
 
-    if graph_name == "wait time":
+    if graph_type == "wait time":
         x_col = 'floor'
     else:
         x_col = 'elevator'
@@ -228,12 +228,12 @@ def  plt_comparison(result, controllers, graph_name):
         
 
     fig.update_layout(
-    yaxis_title=graph_name,
+    yaxis_title=graph_type,
     boxmode='group' # group together boxes of the different traces for each value of x
     )
     
     #save graph as image
-    img_path = "Results/{}.png".format('comparison_graph')
+    img_path = "Results/{}.png".format(graph_name)
     fig.write_image(img_path)
 
 def plot(df,name, text = False):
