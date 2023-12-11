@@ -6,7 +6,7 @@ from simulation.classes.sim import Simulation
 
 from analysis.homogeneous.analysis import print_res, convert_to_reward, calculate_expected_reward, plt_graph
 
-def run_experiment(sim_params, controller, controller_params):
+def run_experiment(sim_params, arrival_pattern, arrival_args, controller, controller_params):
     random.seed(sim_params["seed"])
     np.random.seed(sim_params["seed"])
     result_wait_t = []
@@ -14,7 +14,8 @@ def run_experiment(sim_params, controller, controller_params):
     sim = Simulation(
             sim_params["num_floors"],
             sim_params["num_elevators"],
-            sim_params["total_arrival_rate"],
+            arrival_pattern=arrival_pattern,
+            arrival_args=arrival_args,
             group_controller=controller, 
             controller_args=controller_params)
 

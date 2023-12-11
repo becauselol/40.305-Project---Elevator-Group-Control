@@ -11,10 +11,11 @@ from .DataStore import DataStore
 
 
 class Simulation:
-    def __init__(self, num_floors, num_elevators, total_arrival_rate, group_controller, controller_args):
+    def __init__(self, num_floors, num_elevators, arrival_pattern, arrival_args, group_controller, controller_args):
         self.num_floors = num_floors
         self.num_elevators = num_elevators
-        self.total_arrival_rate = total_arrival_rate
+        self.arrival_pattern = arrival_pattern(**arrival_args)
+        self.arrival_rate_matrix = self.arrival_pattern.get_rate_matrix()
         self.event_queue = []
         self.group_controller = group_controller
         self.controller_args = controller_args
@@ -27,24 +28,25 @@ class Simulation:
         self.cycle_data = DataStore(self.num_floors, 0, self.num_elevators, self.elevators[1].direction)
         
 
-    def initialize_arrivals(self, rate_matrix):
+    def initialize_arrivals(self):
         # check square matrix
-        assert len(rate_matrix) == self.num_floors
-        for arr in rate_matrix:
+        assert len(self.arrival_rate_matrix) == self.num_floors
+
+        for arr in self.arrival_rate_matrix:
             assert len(arr) == self.num_floors
 
-        for i in range(self.num_floors):
-            for j in range(self.num_floors):
+        for i in range(1, self.num_floors + 1):
+            for j in range(1, self.num_floors + 1):
                 if i == j:
                     continue
-                rate = rate_matrix[i][j]
+                rate = self.arrival_pattern.get_arrival_rate(i, j)
                 assert rate != 0
                 arrival_time = exponential(rate)
                 event = passE.ArrivalEvent(
                         arrival_time,
-                        i + 1,
+                        i,
                         self.building,
-                        j + 1,
+                        j,
                         rate
                     )
                 self.event_queue.append((arrival_time, event))
@@ -63,10 +65,8 @@ class Simulation:
         self.initialize_building()
         self.reset_cycle_data(0, self.elevators[1].direction)
 
-        uniform_rate = 1/ (self.total_arrival_rate / ((self.num_floors**2) - self.num_floors))
-        rate_matrix = [[uniform_rate] * self.num_floors for _ in range(self.num_floors)]
 
-        self.initialize_arrivals(rate_matrix)
+        self.initialize_arrivals()
         # print(self.building.elevator.direction)
         count = 0
         while self.event_queue[0][0] < max_time:
