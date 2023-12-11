@@ -182,51 +182,72 @@ def plt_graph(policy_label, data, graph_name, y_lim=(None, None)):
     img_path = "Results/{}.png".format(graph_name)
     fig.savefig(img_path)
 
-def  plt_comparison(data):
+def  plt_comparison(result, controllers, graph_type, graph_name ):
 
-    wait_t = data.loc[:, 'steady state average'].to_list()
-    wait_t = [[v] for v in wait_t]
-    x = data.loc[:, 'floor' ].to_list()
+
     fig = go.Figure()
 
-    fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = "simulation 1", marker_color='#FF4136')) # color="simulation_type"))
+    if graph_type == "wait time":
+        x_col = 'floor'
+    else:
+        x_col = 'elevator'
 
-    
-    fig.update_traces(
-                    # x = x,
-                    q1 = data.loc[:,'steady state average'].to_list(), 
-                    q3 = data.loc[:,'steady state average'].to_list(), 
-                    median = data.loc[:,'steady state average'].to_list(), 
-                    sd = [0]*6,
-                    lowerfence=data.loc[:, 'lower interval'].to_list(),
-                    upperfence=data.loc[:, 'upper interval'].to_list(), 
-                    mean=data.loc[:,'steady state average'].to_list(),
-                    # line_width = 0.1,
-                    selector = ({'name': 'simulation 1'}) )
-    
-    fig.add_trace(go.Box(y=wait_t , x =x,boxpoints=False, name = "simulation 2", marker_color='#FF851B')) # color="simulation_type"))
+    for data, controller in zip(result, controllers):
+        wait_t = data.loc[:, 'steady state average'].to_list()
+        wait_t = [[v] for v in wait_t]
+        x = data.loc[:, x_col ].to_list()
+        fig.add_trace(go.Box(y=wait_t, x=x, boxpoints=False, name = controller)) # color="simulation_type"))
 
-    fig.update_traces(
-                    # x = x,
-                    q1 = data.loc[:,'steady state average'].to_list(), 
-                    q3 = data.loc[:,'steady state average'].to_list(), 
-                    median = data.loc[:,'steady state average'].to_list(), 
-                    sd = [0]*6,
-                    lowerfence=data.loc[:, 'lower interval'].to_list(),
-                    upperfence=data.loc[:, 'upper interval'].to_list(), 
-                    mean=data.loc[:,'steady state average'].to_list(),
-                    # line_width = 0.1,
-                    selector = ({'name': 'simulation 2'}) )
-    
+        fig.update_traces(
+                        # x = x,
+                        q1 = data.loc[:,'steady state average'].to_list(), 
+                        q3 = data.loc[:,'steady state average'].to_list(), 
+                        median = data.loc[:,'steady state average'].to_list(), 
+                        sd = [0]*6,
+                        lowerfence=data.loc[:, 'lower interval'].to_list(),
+                        upperfence=data.loc[:, 'upper interval'].to_list(), 
+                        mean=data.loc[:,'steady state average'].to_list(),
+                        # line_width = 0.1,
+                        selector = ({'name': controller}) )
+
+        
 
     fig.update_layout(
-    yaxis_title='Wait Time',
+    yaxis_title=graph_type,
     boxmode='group' # group together boxes of the different traces for each value of x
     )
     
     #save graph as image
-    img_path = "Results/{}.png".format('comparison_graph')
+    img_path = "Results/{}.png".format(graph_name)
     fig.write_image(img_path)
 
+def plot(df,name, text = False):
+    plt.figure(figsize=(15,8))
+    scatter = sns.scatterplot(data=df, x='wait_time', y= 'idle_time', hue="controller")
 
+    if text:
+        for i in df.index:
+            plt.text(df.loc[i, 'wait_time'], df.loc[i, 'idle_time'], df.loc[i, 'idle_floor_config'])
+    
+    #save graph as image
+    fig = scatter.get_figure()
+    img_path = "Results/{}.png".format(name)
+    fig.savefig(img_path)
+
+
+
+def best(all_data_df, best_type):
+
+    #get best config
+    all_data_df['wait_time_w_interval'] = pd.DataFrame(all_data_df['wait_time'] + all_data_df['wait_time_interval'])
+    best = all_data_df.nsmallest(n=1, columns='wait_time_w_interval')
+    best_config = best.loc[:,best_type].values[0]
+
+    print("Best {a}: {b}".format(a = best_type ,b = best_config))
+
+    # list of all the different controllers with same config
+    comparison = all_data_df.loc[all_data_df[best_type] == best_config]
+
+
+    return comparison, best_config
 
