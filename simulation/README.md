@@ -35,7 +35,7 @@ Float value indicating the start time of the cycle
 
 #### `end_time`
 
-Float value indicatint the end time of the cycle
+Float value indicating the end time of the cycle
 
 #### `cycle_duration`
 
