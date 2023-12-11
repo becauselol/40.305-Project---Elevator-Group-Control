@@ -11,9 +11,11 @@ from .DataStore import DataStore
 
 
 class Simulation:
-    def __init__(self, num_floors, num_elevators, total_arrival_rate, group_controller, controller_args):
+    def __init__(self, num_floors, num_elevators, arrival_pattern, arrival_args, group_controller, controller_args):
         self.num_floors = num_floors
         self.num_elevators = num_elevators
+        self.arrival_pattern = arrival_pattern(num_floors, **arrival_args)
+        self.arrival_rate_matrix = self.arrival_pattern.get_rate_matrix()
         self.total_arrival_rate = total_arrival_rate
         self.event_queue = []
         self.group_controller = group_controller
@@ -27,17 +29,18 @@ class Simulation:
         self.cycle_data = DataStore(self.num_floors, 0, self.num_elevators, self.elevators[1].direction)
         
 
-    def initialize_arrivals(self, rate_matrix):
+    def initialize_arrivals(self):
         # check square matrix
-        assert len(rate_matrix) == self.num_floors
-        for arr in rate_matrix:
+        assert len(self.arrival_rate_matrix) == self.num_floors
+
+        for arr in self.arrival_rate_matrix:
             assert len(arr) == self.num_floors
 
         for i in range(self.num_floors):
             for j in range(self.num_floors):
                 if i == j:
                     continue
-                rate = rate_matrix[i][j]
+                rate = self.arrival_rate_matrix[i][j]
                 assert rate != 0
                 arrival_time = exponential(rate)
                 event = passE.ArrivalEvent(
